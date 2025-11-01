@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>the music twin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:Arial,sans-serif;
+      background:#000;
+      color:#eee;
+      padding:1rem;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+    }
+    .container{max-width:400px;width:100%;margin:2rem auto;background:#111;border-radius:16px;padding:1.5rem;box-shadow:0 0 20px rgba(0,255,0,.2)}
+    h1{font-size:1.8rem;text-align:center;margin-bottom:1rem;color:#0f0}
+    .cover{
+      width:100%;height:250px;object-fit:cover;border-radius:12px;margin-bottom:1rem;
+      background:#222;display:flex;align-items:center;justify-content:center;
+    }
+    .cover img{width:100%;height:100%;object-fit:cover;border-radius:12px}
+    .cover::after{content:'♪';font-size:4rem;color:#0f0;opacity:0.3}
+    .info{text-align:center;margin-bottom:1rem}
+    .title{font-size:1.3rem;font-weight:800;color:#0f0}
+    .artist{font-size:1rem;color:#aaa;margin-top:0.3rem}
+    .progress-container{
+      background:#222;height:6px;border-radius:3px;margin:1rem 0;cursor:pointer;position:relative
+    }
+    .progress{
+      background:#0f0;height:100%;width:0;border-radius:3px;transition:width .1s
+    }
+    .time{display:flex;justify-content:space-between;font-size:0.8rem;color:#666;margin-top:0.3rem}
+    .controls{display:flex;justify-content:center;gap:1rem;margin:1.5rem 0}
+    button{
+      background:none;border:none;color:#eee;font-size:1.8rem;cursor:pointer;transition:.2s
+    }
+    button:hover{color:#0f0;transform:scale(1.1)}
+    .volume-container{
+      display:flex;align-items:center;gap:0.5rem;margin-top:1rem
+    }
+    .volume-container input{
+      flex:1;height:4px;border-radius:2px;background:#333;outline:none;
+      -webkit-appearance:none;
+      appearance:none;
+    }
+    .volume-container input::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      appearance:none;
+      width:14px;height:14px;background:#0f0;border-radius:50%;cursor:pointer
+    }
+    .volume-container input::-moz-range-thumb{
+      width:14px;height:14px;background:#0f0;border-radius:50%;cursor:pointer;border:none
+    }
+    .playlist{
+      list-style:none;max-height:200px;overflow-y:auto;margin-top:1rem;border-top:1px solid #333;padding-top:1rem
+    }
+    .playlist li{
+      padding:0.6rem 0.8rem;border-radius:8px;margin:0.3rem 0;cursor:pointer;transition:.2s;
+      display:flex;justify-content:space-between;align-items:center
+    }
+    .playlist li:hover{background:#222}
+    .playlist li.playing{background:#0f0;color:#000;font-weight:600}
+    .playlist li span{font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>dis ya fav music amirite</h1>
+
+    <div class="cover" id="cover">
+      <img src="" alt="Album Art" id="albumArt">
+    </div>
+
+    <div class="info">
+      <div class="title" id="title">Select a song</div>
+      <div class="artist" id="artist">Unknown Artist</div>
+    </div>
+
+    <div class="progress-container" id="progressContainer">
+      <div class="progress" id="progress"></div>
+    </div>
+    <div class="time">
+      <span
+
+ id="current">0:00</span>
+      <span id="duration">0:00</span>
+    </div>
+
+    <div class="controls">
+      <button id="prev">Previous</button>
+      <button id="play">Play</button>
+      <button id="next">Next</button>
+    </div>
+
+    <div class="volume-container">
+      <span>Volume</span>
+      <input type="range" id="volume" min="0" max="150" value="70">
+    </div>
+
+    <ul class="playlist" id="playlist"></ul>
+  </div>
+
+  <script>
+    // === YOUR MUSIC (ADD .MP3 FILES HERE) ===
+    const songs = [
+      { title: "Habits", artist: "Osamason", src: "music/songs/Habits_KLICKAUD.mp3", cover: "music/album covers/osamason.png" },
+      { title: "Addicted", artist: "Osamason", src: "music/songs/Addicted_KLICKAUD.mp3", cover: "music/album covers/osamason.png" },
+      { title: "Blonde", artist: "Osamason", src: "music/songs/Blonde_KLICKAUD.mp3", cover: "music/album covers/flexmusix.png" },
+      { title: "Pop", artist: "Osamason", src: "music/songs/Pop_KLICKAUD.mp3", cover: "music/album covers/flexmusix.png" },
+      { title: "The Whole World Is Free", artist: "Osamason", src: "music/songs/The_Whole_World_Is_Free_KLICKAUD.mp3", cover: "music/album covers/jumpout.png" },
+      { title: "Lunch", artist: "LilDre556", src: "music/songs/lunch556.mp3", cover: "music/album covers/lunchlady.png" },
+      { title: "Depression Doesn't Explain How I Feel", artist: "Bleeod", src: "music/songs/bleood song.mp3", cover: "music/album covers/bleood.png"},
+      { title: "Santa", artist: "Duwap Kaine", src: "music/songs/santa.mp3", cover: "music/album covers/santa.png" },
+      { title: "41 Song", artist: "Blizzi Boi", src: "music/songs/41song.mp3", cover: "music/album covers/blizziboi.png" },
+      { title: "42 Song", artist: "Blizzi Boi", src: "music/songs/42song.mp3", cover: "music/album covers/42but.png" },
+      { title: "Blood Soda", artist: "Jaydes only because yuke sucks", src: "music/songs/blood soda.mp3", cover: "music/album covers/blood soda.png" },
+      // ADD MORE: { title: "Name", artist: "Artist", src: "music/file.mp3", cover: "music/img.jpg" },
+    ];
+
+    // === ELEMENTS ===
+    const audio = new Audio();
+    const playBtn = document.getElementById('play');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    const title = document.getElementById('title');
+    const artist = document.getElementById('artist');
+    const albumArt = document.getElementById('albumArt');
+    const progressContainer = document.getElementById('progressContainer');
+    const progress = document.getElementById('progress');
+    const currentTimeEl = document.getElementById('current');
+    const durationEl = document.getElementById('duration');
+    const volumeSlider = document.getElementById('volume');
+    const playlist = document.getElementById('playlist');
+
+    let songIndex = 0;
+
+    // === LOAD SONG ===
+    function loadSong(song) {
+      title.textContent = song.title;
+      artist.textContent = song.artist;
+      audio.src = song.src;
+      albumArt.src = song.cover || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjIyIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiM2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBDb3ZlcjwvdGV4dD48L3N2Zz4=';
+      updatePlaylist();
+    }
+
+    // === PLAY SONG ===
+    function playSong() {
+      audio.play();
+      playBtn.textContent = 'Pause';
+      updatePlaylist();
+    }
+
+    function pauseSong() {
+      audio.pause();
+      playBtn.textContent = 'Play';
+    }
+
+    // === UPDATE PROGRESS ===
+    function updateProgress(e) {
+      const { duration, currentTime } = e.srcElement;
+      const progressPercent = (currentTime / duration) * 100;
+      progress.style.width = `${progressPercent}%`;
+      currentTimeEl.textContent = formatTime(currentTime);
+      durationEl.textContent = formatTime(duration);
+    }
+
+    function setProgress(e) {
+      const width = this.clientWidth;
+      const clickX = e.offsetX;
+      const duration = audio.duration;
+      audio.currentTime = (clickX / width) * duration;
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    // === VOLUME ===
+    volumeSlider.addEventListener('input', () => {
+      audio.volume = volumeSlider.value / 100;
+    });
+
+    // === PLAYLIST ===
+    function updatePlaylist() {
+      playlist.innerHTML = '';
+      songs.forEach((song, i) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span>${song.title}</span>
+          <span>${song.artist}</span>
+        `;
+        if (i === songIndex && !audio.paused) li.classList.add('playing');
+        li.addEventListener('click', () => {
+          songIndex = i;
+          loadSong(songs[songIndex]);
+          playSong();
+        });
+        playlist.appendChild(li);
+      });
+    }
+
+    // === BUTTONS ===
+    playBtn.addEventListener('click', () => {
+      const isPlaying = !audio.paused;
+      if (isPlaying) pauseSong();
+      else playSong();
+    });
+
+    prevBtn.addEventListener('click', () => {
+      songIndex = (songIndex - 1 + songs.length) % songs.length;
+      loadSong(songs[songIndex]);
+      playSong();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      songIndex = (songIndex + 1) % songs.length;
+      loadSong(songs[songIndex]);
+      playSong();
+    });
+
+    // === AUDIO EVENTS ===
+    audio.addEventListener('ended', () => {
+      nextBtn.click();
+    });
+
+    audio.addEventListener('timeupdate', updateProgress);
+    progressContainer.addEventListener('click', setProgress);
+
+    // === INIT ===
+    if (songs.length > 0) {
+      loadSong(songs[0]);
+      updatePlaylist();
+    }
+  </script>
+</body>
+</html>

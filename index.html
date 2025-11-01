@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>milesshawt epic site</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="assets/logo.png" id="favicon">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;800&display=swap');
+    :root{--bg:#0d0d0d;--card:#1a1a1a;--text:#eee;--glow:#00ff88;--accent:#00bfff}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);padding:2rem;transition:all .3s}
+    h1{font-size:3rem;text-align:center;margin:2rem 0;background:linear-gradient(90deg,var(--glow),var(--accent));background-clip:text;-webkit-background-clip:text;color:transparent}
+    p{font-size:1.2rem;text-align:center;max-width:600px;margin:0 auto 2rem;color:#aaa}
+    nav a{font-size:1.3rem;margin:0 .5rem;color:#aaa;text-decoration:none}
+    nav a:hover{color:var(--glow)}
+    .grid{display:grid;gap:1.5rem;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));margin-top:3rem}
+    .card{background:var(--card);padding:1.5rem;border-radius:12px;text-align:center;transition:.3s;box-shadow:0 4px 10px rgba(0,255,136,.1)}
+    .card:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(0,255,136,.4)}
+    .card a{color:var(--glow);font-weight:600;text-decoration:none;display:block;margin-top:.5rem}
+    .card img{width:100%;height:120px;object-fit:cover;border-radius:8px;background:#333}
+  </style>
+</head>
+<body>
+  <nav style="text-align:center">
+    <a href="index.html">Home</a>
+    <a href="games.html">Games</a>
+    <a href="apps.html">Apps</a>
+    <a href="info.html">Info</a>
+    <a href="settings.html">Settings</a>
+  </nav>
+
+  <h1>milesshawts site</h1>
+
+  <!-- RANDOM MOTTO HERE -->
+  <p id="motto">Loading...</p>
+
+  <div class="grid">
+    <div class="card">
+      <img src="assets/games.png" alt="Games">
+      <div>Games</div>
+      <a href="games.html">Play Now</a>
+    </div>
+    <div class="card">
+      <img src="assets/apps.png" alt="Apps">
+      <div>Apps</div>
+      <a href="apps.html">Open</a>
+    </div>
+  </div>
+
+  <script>
+    // === YOUR LIST OF MOTTO LINES (EDIT THIS!) ===
+    const mottos = [
+      "pop goes the weasel",
+      "Dude you know what’s crazy? Is that that low taper fade, like meme, dude it is still massive. Yeah. MASSIVE. I mean I’m seeing new ones that I’ve never seen before that have millions of likes and views, still, that are popping up all over the place.",
+      "hi jequan",
+      "i have fun making these little texts btw",
+      "watch poopmadness on utube",
+      "i bet you're using a chromebook on this darn site",
+      "hi",
+      "i said hi say it back",
+      "try the games",
+      "try the apps"
+    ];
+
+    // === PICK RANDOM MOTTO ===
+    const randomMotto = mottos[Math.floor(Math.random() * mottos.length)];
+    document.getElementById('motto').innerHTML = randomMotto;
+
+    // === THEME SYNC (CLEAN TITLE) ===
+    const themes = {
+      dark:     {bg:'#0d0d0d', card:'#1a1a1a', text:'#eee', glow:'#00ff88', accent:'#00bfff'},
+      fulldark: {bg:'#000000', card:'#111111', text:'#ffffff', glow:'#00ff88', accent:'#00bfff'},
+      light:    {bg:'#f5f5f5', card:'#ffffff', text:'#111', glow:'#00c853', accent:'#2962ff'},
+      sakura:   {bg:'#e8b8d0', card:'#d89cc1', text:'#a83b6e', glow:'#ff8ac1', accent:'#ff5aa5'},
+      ocean:    {bg:'#0a1a2f', card:'#0f2b4a', text:'#a0e7ff', glow:'#00d4ff', accent:'#0099cc'},
+      sunset:   {bg:'#ff6b35', card:'#ff8c42', text:'#fff', glow:'#ff4757', accent:'#ffa502'},
+      forest:   {bg:'#1a2e19', card:'#2d4a2b', text:'#b2f2bb', glow:'#51cf66', accent:'#37b24d'},
+      neon:     {bg:'#1a0033', card:'#2a004d', text:'#e0b3ff', glow:'#ff00ff', accent:'#9d00ff'},
+      retro:    {bg:'#0a0a0a', card:'#1a1a1a', text:'#0f0', glow:'#0f0', accent:'#ff0'}
+    };
+
+    const saved = JSON.parse(localStorage.getItem('unblockedHubSettings') || '{}');
+    if (saved.name) document.title = saved.name;
+    if (saved.favicon) document.getElementById('favicon').href = saved.favicon;
+    if (saved.theme && themes[saved.theme]) {
+      const t = themes[saved.theme];
+      Object.keys(t).forEach(k => document.documentElement.style.setProperty('--'+k, t[k]));
+      document.body.style.background = t.bg;
+    }
+  </script>
+</body>
+</html>

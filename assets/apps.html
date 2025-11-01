@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Apps – Unblocked Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="assets/logo.png" id="favicon">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;800&display=swap');
+    :root{--bg:#0d0d0d;--card:#1a1a1a;--text:#eee;--glow:#00ff88;--accent:#00bfff}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);padding:2rem;transition:all .3s}
+    h1{font-size:2.5rem;text-align:center;margin:1rem 0;background:linear-gradient(90deg,var(--glow),var(--accent));background-clip:text;-webkit-background-clip:text;color:transparent}
+    nav a{font-size:1.3rem;margin:0 .5rem;color:#aaa;text-decoration:none}
+    nav a:hover{color:var(--glow)}
+    .search-container{text-align:center;margin:1.5rem 0}
+    #searchInput{
+      width:100%;max-width:500px;padding:0.9rem 1.2rem;
+      border-radius:12px;border:1px solid #444;
+      background:#222;color:#fff;font-size:1rem;
+      outline:none;transition:.3s
+    }
+    #searchInput:focus{border-color:var(--glow);box-shadow:0 0 10px rgba(0,255,136,.3)}
+    .grid{display:grid;gap:1.5rem;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));margin-top:1rem}
+    .card{background:var(--card);padding:1.5rem;border-radius:12px;text-align:center;transition:.3s;box-shadow:0 4px 10px rgba(0,255,136,.1)}
+    .card:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(0,255,136,.4)}
+    .card a{color:var(--glow);font-weight:600;text-decoration:none;display:block;margin-top:.5rem}
+    .card img{width:100%;height:120px;object-fit:cover;border-radius:8px;background:#333}
+    .no-results{display:none;text-align:center;color:#f66;margin:2rem;font-size:1.1rem}
+  </style>
+</head>
+<body>
+  <nav style="text-align:center">
+    <a href="index.html">Home</a>
+    <a href="games.html">Games</a>
+    <a href="apps.html">Apps</a>
+    <a href="info.html">Info</a>
+    <a href="settings.html">Settings</a>
+  </nav>
+
+  <h1>Web Apps</h1>
+
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Search apps..." autocomplete="off">
+  </div>
+
+  <div class="grid" id="appGrid">
+    <!-- APPS ADDED BY JS -->
+  </div>
+
+  <p class="no-results" id="noResults">No apps found.</p>
+
+  <script>
+    // === APP DATA (EDIT THIS!) ===
+    const apps = [
+      { name: 'Calculator', file: 'apps/calculator/index.html', img: 'apps/calculator/screenshot.png' },
+      { name: 'Chat', file: 'apps/chat/index.html', img: 'apps/chat/image.png' },
+      { name: 'Music Player', file: 'apps/music/index.html', img: 'apps/music/image.png' },
+      // ADD MORE: { name: 'Your App', file: 'apps/folder/app.html', img: 'apps/folder/img.png' },
+    ];
+
+    // === SORT ALPHABETICALLY (A-Z) ===
+    apps.sort((a, b) => a.name.localeCompare(b.name));
+
+    // === RENDER APPS ===
+    const grid = document.getElementById('appGrid');
+    const noResults = document.getElementById('noResults');
+
+    function renderApps(filter = '') {
+      grid.innerHTML = '';
+      const lowerFilter = filter.toLowerCase();
+      const filtered = apps.filter(a => a.name.toLowerCase().includes(lowerFilter));
+      
+      if (filtered.length === 0) {
+        noResults.style.display = 'block';
+        return;
+      }
+      noResults.style.display = 'none';
+
+      filtered.forEach(app => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <img src="${app.img}" alt="${app.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMzMzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='">
+          <div>${app.name}</div>
+          <a href="${app.file}">Open</a>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // === SEARCH ===
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', () => {
+      renderApps(searchInput.value);
+    });
+
+    // === INITIAL LOAD ===
+    renderApps();
+
+    // === THEME SYNC (CLEAN TITLE) ===
+    const themes = {
+      dark:     {bg:'#0d0d0d', card:'#1a1a1a', text:'#eee', glow:'#00ff88', accent:'#00bfff'},
+      fulldark: {bg:'#000000', card:'#111111', text:'#ffffff', glow:'#00ff88', accent:'#00bfff'},
+      light:    {bg:'#f5f5f5', card:'#ffffff', text:'#111', glow:'#00c853', accent:'#2962ff'},
+      sakura:   {bg:'#e8b8d0', card:'#d89cc1', text:'#a83b6e', glow:'#ff8ac1', accent:'#ff5aa5'},
+      ocean:    {bg:'#0a1a2f', card:'#0f2b4a', text:'#a0e7ff', glow:'#00d4ff', accent:'#0099cc'},
+      sunset:   {bg:'#ff6b35', card:'#ff8c42', text:'#fff', glow:'#ff4757', accent:'#ffa502'},
+      forest:   {bg:'#1a2e19', card:'#2d4a2b', text:'#b2f2bb', glow:'#51cf66', accent:'#37b24d'},
+      neon:     {bg:'#1a0033', card:'#2a004d', text:'#e0b3ff', glow:'#ff00ff', accent:'#9d00ff'},
+      retro:    {bg:'#0a0a0a', card:'#1a1a1a', text:'#0f0', glow:'#0f0', accent:'#ff0'}
+    };
+
+    const saved = JSON.parse(localStorage.getItem('unblockedHubSettings') || '{}');
+    if (saved.name) document.title = saved.name;  // ← CLEAN TITLE
+    if (saved.favicon) document.getElementById('favicon').href = saved.favicon;
+    if (saved.theme && themes[saved.theme]) {
+      const t = themes[saved.theme];
+      Object.keys(t).forEach(k => document.documentElement.style.setProperty('--'+k, t[k]));
+      document.body.style.background = t.bg;
+    }
+  </script>
+</body>
+</html>
