@@ -25,7 +25,6 @@
             font-size: 1.8rem;
             font-weight: 600;
         }
-        /* Home button to YOUR main site */
         .home-link {
             position: absolute;
             left: 1rem;
@@ -114,7 +113,6 @@
 <body>
 
 <header>
-    <!-- This button goes to YOUR main site -->
     <a href="/" class="home-link">Home</a>
     <h1>browse</h1>
 </header>
@@ -128,11 +126,11 @@
     </div>
 
     <p class="note">
-        powered by allorigins - some sites may not work
+        powered by allorigins - links stay in proxy
     </p>
 
     <iframe id="proxyFrame"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups">
+            sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-top-navigation-by-user-activation">
     </iframe>
 </div>
 
@@ -141,6 +139,9 @@
     const input = document.getElementById('urlInput');
     const btn   = document.getElementById('goBtn');
     const frame = document.getElementById('proxyFrame');
+
+    // Your proxy page URL (e.g. /proxy or /browse.html)
+    const PROXY_PAGE_URL = location.href.split('?')[0];  // Clean URL
 
     function isValidUrl(str) {
         const trimmed = str.trim();
@@ -173,7 +174,11 @@
             targetUrl = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(raw);
         }
 
-        frame.src = proxyBase + encodeURIComponent(targetUrl);
+        // Load via allorigins + inject link-rewriting script
+        const proxyUrl = proxyBase + encodeURIComponent(targetUrl);
+        const fullUrl = proxyUrl + '&_proxy_rewrite=1';
+
+        frame.src = fullUrl;
 
         // Keep URL clean
         history.replaceState(null, '', location.pathname);
@@ -182,6 +187,53 @@
     btn.addEventListener('click', loadSite);
     input.addEventListener('keydown', e => {
         if (e.key === 'Enter') loadSite();
+    });
+
+    // === LINK REWRITING INSIDE IFRAME ===
+    frame.addEventListener('load', () => {
+        try {
+            const doc = frame.contentDocument || frame.contentWindow.document;
+
+            // Inject script to rewrite ALL links
+            const script = doc.createElement('script');
+            script.textContent = `
+                (function() {
+                    const PROXY_PAGE = "${PROXY_PAGE_URL}";
+                    document.addEventListener('click', function(e) {
+                        let a = e.target.closest('a');
+                        if (!a) return;
+                        if (a.target === '_blank') return; // Let real new tabs open
+                        e.preventDefault();
+                        const url = a.href;
+                        if (url && url.startsWith('http')) {
+                            const proxied = "${proxyBase}" + encodeURIComponent(url);
+                            location.href = PROXY_PAGE + '?url=' + encodeURIComponent(url);
+                        } else if (url) {
+                            location.href = url;
+                        }
+                    }, true);
+
+                    // Also rewrite form submissions
+                    document.addEventListener('submit', function(e) {
+                        const form = e.target;
+                        if (form.target === '_blank') return;
+                        const action = form.action;
+                        if (action && action.startsWith('http')) {
+                            e.preventDefault();
+                            const method = form.method.toUpperCase();
+                            const data = new FormData(form);
+                            const url = new URL(action);
+                            for (let [k, v] of data) url.searchParams.append(k, v);
+                            const finalUrl = method === 'GET' ? url.toString() : action;
+                            location.href = PROXY_PAGE + '?url=' + encodeURIComponent(finalUrl);
+                        }
+                    });
+                })();
+            `;
+            doc.head.appendChild(script);
+        } catch (e) {
+            console.log("Cannot inject into iframe (CORS or sandbox)");
+        }
     });
 </script>
 
