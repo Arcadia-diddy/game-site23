@@ -25,7 +25,8 @@
             font-size: 1.8rem;
             font-weight: 600;
         }
-        .home-btn {
+        /* Home button to YOUR main site */
+        .home-link {
             position: absolute;
             left: 1rem;
             top: 50%;
@@ -37,11 +38,11 @@
             border-radius: 6px;
             font-size: .9rem;
             font-weight: 600;
+            text-decoration: none;
             cursor: pointer;
-            display: none;
             transition: all 0.2s;
         }
-        .home-btn:hover {
+        .home-link:hover {
             background: #00bfff;
             color: #121212;
         }
@@ -113,8 +114,9 @@
 <body>
 
 <header>
-    <button class="home-btn" id="homeBtn">Home</button>
-    <h1>brows</h1>
+    <!-- This button goes to YOUR main site -->
+    <a href="/" class="home-link">Home</a>
+    <h1>browse</h1>
 </header>
 
 <div class="container">
@@ -139,7 +141,6 @@
     const input = document.getElementById('urlInput');
     const btn   = document.getElementById('goBtn');
     const frame = document.getElementById('proxyFrame');
-    const homeBtn = document.getElementById('homeBtn');
 
     function isValidUrl(str) {
         const trimmed = str.trim();
@@ -174,30 +175,13 @@
 
         frame.src = proxyBase + encodeURIComponent(targetUrl);
 
-        // Show Home button
-        homeBtn.style.display = 'block';
-
         // Keep URL clean
         history.replaceState(null, '', location.pathname);
     }
 
-    // Go button
     btn.addEventListener('click', loadSite);
     input.addEventListener('keydown', e => {
         if (e.key === 'Enter') loadSite();
-    });
-
-    // Home button: reset to start page
-    homeBtn.addEventListener('click', () => {
-        frame.src = 'about:blank';  // Clear iframe
-        input.value = '';
-        input.focus();
-        homeBtn.style.display = 'none';  // Hide button
-    });
-
-    // Optional: hide home button on page load
-    window.addEventListener('load', () => {
-        homeBtn.style.display = 'none';
     });
 </script>
 
