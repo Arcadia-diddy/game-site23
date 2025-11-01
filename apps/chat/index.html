@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Chat</title>
+  <title>Study Chat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
@@ -18,7 +18,7 @@
     .container{max-width:800px;width:100%;margin:0 auto}
     h1{font-size:2rem;text-align:center;margin:1rem 0;color:#0f0}
     .status{text-align:center;margin:1rem 0;font-size:0.9rem;color:#aaa}
-    #connectCode{
+    #roomCode{
       text-align:center;margin:1rem 0;padding:1rem;
       background:#111;border-radius:12px;
       font-family:monospace;font-size:1.8rem;letter-spacing:0.4ch;
@@ -51,14 +51,9 @@
       cursor:pointer;transition:.3s
     }
     #sendBtn:hover{transform:scale(1.05)}
-    #connectBtn{
-      background:#0066ff;color:#fff;padding:0.8rem 1.5rem;
-      border:none;border-radius:12px;font-weight:600;
-      cursor:pointer;margin:1rem auto;display:block
-    }
     .flex{display:flex;flex-direction:column}
     .flex-center{align-items:center;justify-content:center;height:80vh}
-    #nameScreen, #connectScreen, #chatScreen{display:none}
+    #nameScreen, #roomScreen, #chatScreen{display:none}
     input[type="text"]{
       width:100%;max-width:300px;padding:0.9rem;
       border-radius:12px;border:1px solid #333;
@@ -73,7 +68,6 @@
     }
     .copy-btn:hover{background:#0f0;color:#000}
     .error{color:#f66;text-align:center;margin:1rem}
-    .retry-btn{background:#f66;color:#000;padding:0.8rem;border-radius:12px;border:none;cursor:pointer;margin:1rem auto;display:block}
   </style>
 </head>
 <body>
@@ -82,22 +76,21 @@
     <!-- NAME SCREEN -->
     <div id="nameScreen" class="flex-center">
       <div style="text-align:center">
-        <h1>Chat</h1>
+        <h1>Study Chat</h1>
         <p style="color:#aaa">Choose your name:</p>
         <input type="text" id="nameInput" placeholder="e.g. Alex" maxlength="20">
         <button id="setNameBtn" style="margin-top:1rem;background:#0f0;color:#000;padding:0.8rem 1.5rem;border:none;border-radius:12px;font-weight:800;cursor:pointer">Continue</button>
-        <p class="error" id="errorMsg"></p>
       </div>
     </div>
 
-    <!-- CONNECT SCREEN -->
-    <div id="connectScreen" class="flex-center">
-      <p class="status">Give this code to your friend:</p>
-      <div id="connectCode">------</div>
+    <!-- ROOM SCREEN -->
+    <div id="roomScreen" class="flex-center">
+      <p class="status">Share this room code:</p>
+      <div id="roomCode">------</div>
       <button class="copy-btn" id="copyBtn">Copy Code</button>
-      <p style="margin-top:1rem;color:#aaa">Or enter your friend's code:</p>
-      <button id="connectBtn">Connect</button>
-      <button class="retry-btn" id="retryBtn" style="display:none">Retry Connection</button>
+      <p style="margin-top:1rem;color:#aaa">Or enter a code to join:</p>
+      <input type="text" id="joinInput" placeholder="Enter code" maxlength="6">
+      <button id="joinBtn" style="margin-top:0.5rem;background:#0066ff;color:#fff;padding:0.8rem 1.5rem;border:none;border-radius:12px;font-weight:600;cursor:pointer">Join</button>
     </div>
 
     <!-- CHAT SCREEN -->
@@ -110,175 +103,153 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <script>
-    let peer = null;
-    let conn = null;
+    // === LOCAL CHAT USING localStorage + POLLING ===
     let myName = '';
-    let theirName = 'Friend';
-    let myId = '';
+    let roomCode = '';
+    let lastMsgId = 0;
 
     const nameScreen = document.getElementById('nameScreen');
-    const connectScreen = document.getElementById('connectScreen');
+    const roomScreen = document.getElementById('roomScreen');
     const chatScreen = document.getElementById('chatScreen');
     const messages = document.getElementById('messages');
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
-    const connectBtn = document.getElementById('connectBtn');
-    const connectCode = document.getElementById('connectCode');
+    const roomCodeEl = document.getElementById('roomCode');
     const copyBtn = document.getElementById('copyBtn');
     const nameInput = document.getElementById('nameInput');
     const setNameBtn = document.getElementById('setNameBtn');
-    const errorMsg = document.getElementById('errorMsg');
-    const retryBtn = document.getElementById('retryBtn');
+    const joinInput = document.getElementById('joinInput');
+    const joinBtn = document.getElementById('joinBtn');
 
-    // === GENERATE RANDOM ID (NO CONFLICTS) ===
-    function generateId() {
-      return Math.random().toString(36).substring(2, 10); // Longer for uniqueness
+    // === GENERATE 6-DIGIT CODE ===
+    function generateCode() {
+      return Math.floor(100000 + Math.random() * 900000).toString();
     }
 
-    // === SET NAME AND CREATE PEER ===
-    setNameBtn.onclick = () => {
-      myName = nameInput.value.trim() || 'User';
-      if (myName.length > 20) myName = myName.slice(0, 20);
-
-      errorMsg.textContent = '';
-      retryBtn.style.display = 'none';
-
-      // Generate random ID (no custom short codes to avoid conflicts)
-      myId = generateId();
-      connectCode.textContent = myId;
-
-      // Use reliable free signaling server
-      peer = new Peer(myId, {
-        host: 'peerjs-0.herokuapp.com',  // Alternative reliable server
-        port: 443,
-        path: '/peerjs',
-        secure: true,
-        config: {
-          iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },  // Google STUN for NAT
-            { urls: 'stun:stun1.l.google.com:19302' }
-          ]
-        }
+    // === SAVE MESSAGE ===
+    function saveMessage(text, sender) {
+      const chat = JSON.parse(localStorage.getItem(`chat_${roomCode}`) || '[]');
+      chat.push({
+        id: Date.now(),
+        text,
+        sender,
+        time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
       });
+      localStorage.setItem(`chat_${roomCode}`, JSON.stringify(chat));
+    }
 
-      peer.on('open', (id) => {
-        console.log('Connected with ID:', id);
-        nameScreen.style.display = 'none';
-        connectScreen.style.display = 'block';
+    // === LOAD MESSAGES ===
+    function loadMessages() {
+      const chat = JSON.parse(localStorage.getItem(`chat_${roomCode}`) || '[]');
+      const newMsgs = chat.filter(m => m.id > lastMsgId);
+      newMsgs.forEach(msg => {
+        const type = msg.sender === myName ? 'me' : 'them';
+        addMessage(`${msg.text} <span>${msg.sender} • ${msg.time}</span>`, type);
+        lastMsgId = msg.id;
       });
+      if (newMsgs.length > 0) playSound();
+    }
 
-      peer.on('error', (err) => {
-        console.error('Peer error:', err);
-        if (err.type === 'unavailable-id' || err.type === 'network') {
-          errorMsg.textContent = 'Server busy. Retrying...';
-          retryBtn.style.display = 'block';
-          retryBtn.onclick = () => location.reload();
-        } else {
-          errorMsg.textContent = 'Connection failed. Check Wi-Fi or try later.';
-        }
-      });
-
-      // Incoming connection
-      peer.on('connection', (incoming) => {
-        conn = incoming;
-        setupConnection(conn);
-        connectScreen.style.display = 'none';
-        chatScreen.style.display = 'block';
-      });
-    };
-
-    nameInput.addEventListener('keypress', e => {
-      if (e.key === 'Enter') setNameBtn.click();
-    });
-
-    // === COPY BUTTON ===
-    copyBtn.onclick = () => {
-      navigator.clipboard.writeText(myId).then(() => {
-        copyBtn.textContent = 'Copied!';
-        setTimeout(() => copyBtn.textContent = 'Copy Code', 2000);
-      }).catch(() => {
-        prompt('Copy this code:', myId);
-      });
-    };
-
-    // === CONNECT BUTTON ===
-    connectBtn.onclick = () => {
-      const id = prompt('Enter your friend\'s code:')?.trim();
-      if (!id) return;
-      if (id === myId) {
-        alert("You can't chat with yourself!");
-        return;
-      }
-
-      conn = peer.connect(id);
-      setupConnection(conn);
-      connectScreen.style.display = 'none';
-      chatScreen.style.display = 'block';
-    };
-
-    // === SETUP CONNECTION ===
-    function setupConnection(connection) {
-      conn = connection;
-      conn.on('open', () => {
-        conn.send({ type: 'name', name: myName });
-        addMessage('Connected!', 'system');
-      });
-
-      conn.on('data', (data) => {
-        if (data.type === 'name') {
-          theirName = data.name;
-          addMessage(`${theirName} joined.`, 'system');
-        } else {
-          addMessage(data, 'them', theirName);
-          playSound();
-        }
-      });
-
-      conn.on('close', () => {
-        addMessage(`${theirName} left.`, 'system');
-      });
-
-      conn.on('error', (err) => {
-        addMessage('Connection lost: ' + err.message, 'system');
-        // Auto-retry
-        setTimeout(() => {
-          conn = peer.connect(conn.peer);
-          setupConnection(conn);
-        }, 3000);
-      });
+    // === ADD MESSAGE TO SCREEN ===
+    function addMessage(html, type) {
+      const li = document.createElement('li');
+      li.className = `msg ${type}`;
+      li.innerHTML = html;
+      messages.appendChild(li);
+      messages.scrollTop = messages.scrollHeight;
     }
 
     // === SEND MESSAGE ===
     function sendMessage() {
-      const msg = messageInput.value.trim();
-      if (!msg || !conn) return;
-      conn.send(msg);
-      addMessage(msg, 'me', myName);
+      const text = messageInput.value.trim();
+      if (!text) return;
+      saveMessage(text, myName);
       messageInput.value = '';
-      playSound();
+      loadMessages(); // instant show
     }
 
+    // === POLL FOR NEW MESSAGES ===
+    function startPolling() {
+      setInterval(loadMessages, 1000);
+    }
+
+    // === SET NAME ===
+    setNameBtn.onclick = () => {
+      myName = nameInput.value.trim() || 'User';
+      if (myName.length > 20) myName = myName.slice(0, 20);
+      nameScreen.style.display = 'none';
+      roomScreen.style.display = 'block';
+
+      // Try to load existing room from URL
+      const urlParams = new URLSearchParams(location.search);
+      roomCode = urlParams.get('room');
+      if (roomCode && roomCode.length === 6) {
+        roomCodeEl.textContent = roomCode;
+        joinRoom();
+        return;
+      }
+
+      // Generate new room
+      roomCode = generateCode();
+      roomCodeEl.textContent = roomCode;
+      updateURL();
+    };
+
+    // === COPY CODE ===
+    copyBtn.onclick = () => {
+      const url = `${location.origin}${location.pathname}?room=${roomCode}`;
+      navigator.clipboard.writeText(url).then(() => {
+        copyBtn.textContent = 'Copied Link!';
+        setTimeout(() => copyBtn.textContent = 'Copy Link', 2000);
+      });
+    };
+
+    // === JOIN ROOM ===
+    joinBtn.onclick = () => {
+      const code = joinInput.value.trim();
+      if (code.length !== 6) {
+        alert('Code must be 6 digits');
+        return;
+      }
+      roomCode = code;
+      roomCodeEl.textContent = roomCode;
+      updateURL();
+      joinRoom();
+    };
+
+    function updateURL() {
+      history.replaceState(null, '', `?room=${roomCode}`);
+    }
+
+    function joinRoom() {
+      roomScreen.style.display = 'none';
+      chatScreen.style.display = 'block';
+      loadMessages();
+      startPolling();
+    }
+
+    // === BUTTONS ===
     sendBtn.onclick = sendMessage;
     messageInput.addEventListener('keypress', e => {
       if (e.key === 'Enter') sendMessage();
     });
-
-    // === ADD MESSAGE ===
-    function addMessage(text, type, sender = '') {
-      const li = document.createElement('li');
-      li.className = `msg ${type}`;
-      li.innerHTML = `<div>${text}</div>${sender ? `<span>${sender}</span>` : ''}`;
-      messages.appendChild(li);
-      messages.scrollTop = messages.scrollHeight;
-    }
 
     // === SOUND ===
     function playSound() {
       const audio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
       audio.play().catch(() => {});
     }
+
+    // === AUTO-JOIN FROM URL ===
+    window.addEventListener('load', () => {
+      const urlParams = new URLSearchParams(location.search);
+      if (urlParams.get('room')) {
+        nameScreen.style.display = 'flex';
+      } else {
+        nameScreen.style.display = 'flex';
+      }
+    });
 
     // === SHOW NAME SCREEN ===
     nameScreen.style.display = 'flex';
