@@ -114,7 +114,6 @@
 
 <script>
     const proxyBase = 'https://api.allorigins.win/raw?url=';
-    const ddgBase   = 'https://duckduckgo.com/html/?q=';
 
     const input = document.getElementById('urlInput');
     const btn   = document.getElementById('goBtn');
@@ -124,13 +123,8 @@
     function isValidUrl(str) {
         const trimmed = str.trim();
         if (!trimmed) return false;
-
-        // Has a dot and no spaces → likely a domain
         if (trimmed.includes('.') && !trimmed.includes(' ')) return true;
-
-        // Starts with http:// or https://
         if (/^https?:\/\//i.test(trimmed)) return true;
-
         return false;
     }
 
@@ -149,17 +143,18 @@
             return;
         }
 
-        let target;
+        let targetUrl;
 
         if (isValidUrl(raw)) {
             // It's a site → proxy it
-            target = proxyBase + encodeURIComponent(normalizeUrl(raw));
+            targetUrl = normalizeUrl(raw);
         } else {
-            // It's a search → DuckDuckGo (HTML version, no JS tracking)
-            target = ddgBase + encodeURIComponent(raw);
+            // It's a search → DuckDuckGo HTML version (via proxy)
+            targetUrl = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(raw);
         }
 
-        frame.src = target;
+        // Always go through allorigins to avoid iframe blocks
+        frame.src = proxyBase + encodeURIComponent(targetUrl);
 
         // Keep URL clean
         history.replaceState(null, '', location.pathname);
