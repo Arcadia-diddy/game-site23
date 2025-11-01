@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>search</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f4f9;
+            color: #333;
+        }
+        header {
+            background: #007bff;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .search-box {
+            display: flex;
+            gap: .5rem;
+            margin-bottom: 1rem;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: .6rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: .6rem 1.2rem;
+            font-size: 1rem;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover { background: #218838; }
+        iframe {
+            width: 100%;
+            height: calc(100vh - 180px);
+            border: none;
+            border-top: 2px solid #ddd;
+            background: white;
+        }
+        .note {
+            font-size: .85rem;
+            color: #666;
+            margin-top: .5rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>look around</h1>
+</header>
+
+<div class="container">
+    <div class="search-box">
+        <input type="text" id="urlInput" placeholder="Enter any website (e.g. https://example.com or just example.com)" autocomplete="off">
+        <button id="goBtn">Go</button>
+    </div>
+
+    <p class="note">
+        some sites may not work
+    </p>
+
+    <iframe id="proxyFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"></iframe>
+</div>
+
+<script>
+    // List of free public proxies – rotate if one gets blocked
+    const proxies = [
+        'https://api.allorigins.win/raw?url=',
+        'https://corsproxy.io/?',
+        'https://thingproxy.freeboard.io/fetch/'
+    ];
+
+    const input   = document.getElementById('urlInput');
+    const btn     = document.getElementById('goBtn');
+    const frame   = document.getElementById('proxyFrame');
+
+    // Helper: turn a user string into a full URL
+    function normalizeUrl(str) {
+        str = str.trim();
+        if (!str) return '';
+        if (!/^https?:\/\//i.test(str)) {
+            str = 'https://' + str;
+        }
+        return str;
+    }
+
+    // Pick a random proxy (simple rotation)
+    function getProxyUrl(target) {
+        const idx = Math.floor(Math.random() * proxies.length);
+        return proxies[idx] + encodeURIComponent(target);
+    }
+
+    function loadSite() {
+        const raw = normalizeUrl(input.value);
+        if (!raw) {
+            alert('Please enter a website URL.');
+            return;
+        }
+        const proxied = getProxyUrl(raw);
+        frame.src = proxied;
+        // Optional: remember last URL
+        history.replaceState(null, '', '?' + encodeURIComponent(raw));
+    }
+
+    // Click button
+    btn.addEventListener('click', loadSite);
+
+    // Press Enter in the input
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') loadSite();
+    });
+
+    // Load URL from query string on page load (e.g. shareable links)
+    window.addEventListener('load', () => {
+        const params = new URLSearchParams(location.search);
+        const urlParam = params.get('');
+        if (urlParam) {
+            input.value = decodeURIComponent(urlParam);
+            loadSite();
+        }
+    });
+</script>
+
+</body>
+</html>
