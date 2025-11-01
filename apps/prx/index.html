@@ -163,7 +163,7 @@
     <a href="/" class="home-link">Home</a>
     <h1>browse</h1>
     <button id="fullscreenBtn" class="fullscreen-btn" title="Toggle Fullscreen">
-        <span class="icon">⛶</span>
+        <span class="icon">Full</span>
     </button>
 </header>
 
@@ -185,10 +185,62 @@
 </div>
 
 <script>
+    // --------------------------------------------------------------
+    // 1. Proxy base (allorigins)
+    // --------------------------------------------------------------
     const proxyBase = 'https://api.allorigins.win/raw?url=';
+    const frame = document.getElementById('proxyFrame');
+
+    // --------------------------------------------------------------
+    // 2. Intercept *any* change to the iframe's src
+    // --------------------------------------------------------------
+    (function () {
+        // ---- MutationObserver (catches setAttribute / attribute changes) ----
+        const observer = new MutationObserver(mutations => {
+            mutations.forEach(m => {
+                if (m.type === 'attributes' && m.attributeName === 'src') {
+                    const raw = frame.getAttribute('src');
+                    if (raw && !raw.startsWith(proxyBase)) {
+                        frame.setAttribute('src', proxyBase + encodeURIComponent(raw));
+                    }
+                }
+            });
+        });
+        observer.observe(frame, { attributes: true, attributeFilter: ['src'] });
+
+        // ---- Override .src property setter ----
+        let _src = frame.src;
+        Object.defineProperty(frame, 'src', {
+            get: () => _src,
+            set: (value) => {
+                if (value && !value.startsWith(proxyBase)) {
+                    const proxied = proxyBase + encodeURIComponent(value);
+                    _src = proxied;
+                    frame.setAttribute('src', proxied);
+                } else {
+                    _src = value;
+                    frame.setAttribute('src', value);
+                }
+            }
+        });
+
+        // ---- Override setAttribute (just in case) ----
+        const origSetAttr = frame.setAttribute;
+        frame.setAttribute = function (name, value) {
+            if (name === 'src' && value && !value.startsWith(proxyBase)) {
+                const proxied = proxyBase + encodeURIComponent(value);
+                origSetAttr.call(this, name, proxied);
+            } else {
+                origSetAttr.call(this, name, value);
+            }
+        };
+    })();
+
+    // --------------------------------------------------------------
+    // 3. Existing UI logic (unchanged, except it now uses the proxy)
+    // --------------------------------------------------------------
     const input = document.getElementById('urlInput');
     const btn   = document.getElementById('goBtn');
-    const frame = document.getElementById('proxyFrame');
     const fullscreenBtn = document.getElementById('fullscreenBtn');
     const icon = fullscreenBtn.querySelector('.icon');
 
@@ -197,26 +249,25 @@
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().then(() => {
                 document.body.classList.add('fullscreen');
-                icon.textContent = '✖';
+                icon.textContent = 'Close';
             }).catch(err => {
                 console.error(`Error attempting to enable fullscreen: ${err.message}`);
             });
         } else {
             document.exitFullscreen().then(() => {
                 document.body.classList.remove('fullscreen');
-                icon.textContent = '⛶';
+                icon.textContent = 'Full';
             });
         }
     });
 
-    // Update icon when fullscreen changes externally
     document.addEventListener('fullscreenchange', () => {
         if (document.fullscreenElement) {
             document.body.classList.add('fullscreen');
-            icon.textContent = '✖';
+            icon.textContent = 'Close';
         } else {
             document.body.classList.remove('fullscreen');
-            icon.textContent = '⛶';
+            icon.textContent = 'Full';
         }
     });
 
@@ -244,14 +295,14 @@
         }
 
         let targetUrl;
-
         if (isValidUrl(raw)) {
             targetUrl = normalizeUrl(raw);
         } else {
             targetUrl = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(raw);
         }
 
-        frame.src = proxyBase + encodeURIComponent(targetUrl);
+        // This assignment will be caught by the overrides above
+        frame.src = targetUrl;
 
         // Keep URL clean
         history.replaceState(null, '', location.pathname);
