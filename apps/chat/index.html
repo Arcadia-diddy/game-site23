@@ -85,9 +85,9 @@
 
     <!-- ROOM SCREEN -->
     <div id="roomScreen" class="flex-center">
-      <p class="status">Share this room code:</p>
+      <p class="status">Share this link with your friend:</p>
       <div id="roomCode">------</div>
-      <button class="copy-btn" id="copyBtn">Copy Code</button>
+      <button class="copy-btn" id="copyBtn">Copy Link</button>
       <p style="margin-top:1rem;color:#aaa">Or enter a code to join:</p>
       <input type="text" id="joinInput" placeholder="Enter code" maxlength="6">
       <button id="joinBtn" style="margin-top:0.5rem;background:#0066ff;color:#fff;padding:0.8rem 1.5rem;border:none;border-radius:12px;font-weight:600;cursor:pointer">Join</button>
@@ -104,7 +104,7 @@
   </div>
 
   <script>
-    // === LOCAL CHAT USING localStorage + POLLING ===
+    // === GLOBAL CHAT USING localStorage + POLLING ===
     let myName = '';
     let roomCode = '';
     let lastMsgId = 0;
@@ -129,19 +129,23 @@
 
     // === SAVE MESSAGE ===
     function saveMessage(text, sender) {
-      const chat = JSON.parse(localStorage.getItem(`chat_${roomCode}`) || '[]');
+      const key = `chat_${roomCode}`;
+      const chat = JSON.parse(localStorage.getItem(key) || '[]');
       chat.push({
         id: Date.now(),
         text,
         sender,
         time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
       });
-      localStorage.setItem(`chat_${roomCode}`, JSON.stringify(chat));
+      // Keep only last 100 messages
+      if (chat.length > 100) chat.splice(0, chat.length - 100);
+      localStorage.setItem(key, JSON.stringify(chat));
     }
 
     // === LOAD MESSAGES ===
     function loadMessages() {
-      const chat = JSON.parse(localStorage.getItem(`chat_${roomCode}`) || '[]');
+      const key = `chat_${roomCode}`;
+      const chat = JSON.parse(localStorage.getItem(key) || '[]');
       const newMsgs = chat.filter(m => m.id > lastMsgId);
       newMsgs.forEach(msg => {
         const type = msg.sender === myName ? 'me' : 'them';
@@ -166,12 +170,12 @@
       if (!text) return;
       saveMessage(text, myName);
       messageInput.value = '';
-      loadMessages(); // instant show
+      loadMessages(); // Show instantly
     }
 
-    // === POLL FOR NEW MESSAGES ===
+    // === POLL FOR NEW MESSAGES (FAST) ===
     function startPolling() {
-      setInterval(loadMessages, 1000);
+      setInterval(loadMessages, 500); // Every 0.5 seconds
     }
 
     // === SET NAME ===
@@ -181,7 +185,7 @@
       nameScreen.style.display = 'none';
       roomScreen.style.display = 'block';
 
-      // Try to load existing room from URL
+      // Check URL for room
       const urlParams = new URLSearchParams(location.search);
       roomCode = urlParams.get('room');
       if (roomCode && roomCode.length === 6) {
@@ -190,26 +194,28 @@
         return;
       }
 
-      // Generate new room
+      // Create new room
       roomCode = generateCode();
       roomCodeEl.textContent = roomCode;
       updateURL();
     };
 
-    // === COPY CODE ===
+    // === COPY FULL URL ===
     copyBtn.onclick = () => {
-      const url = `${location.origin}${location.pathname}?room=${roomCode}`;
-      navigator.clipboard.writeText(url).then(() => {
+      const fullURL = `${location.origin}${location.pathname}?room=${roomCode}`;
+      navigator.clipboard.writeText(fullURL).then(() => {
         copyBtn.textContent = 'Copied Link!';
         setTimeout(() => copyBtn.textContent = 'Copy Link', 2000);
+      }).catch(() => {
+        prompt('Copy this link:', fullURL);
       });
     };
 
     // === JOIN ROOM ===
     joinBtn.onclick = () => {
       const code = joinInput.value.trim();
-      if (code.length !== 6) {
-        alert('Code must be 6 digits');
+      if (code.length !== 6 || !/^\d+$/.test(code)) {
+        alert('Enter a valid 6-digit code');
         return;
       }
       roomCode = code;
