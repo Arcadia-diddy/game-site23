@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>browse</title>
+    <title>have fun</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -92,20 +92,19 @@
 <body>
 
 <header>
-    <h1>browse around</h1>
+    <h1>browse</h1>
 </header>
 
 <div class="container">
     <div class="search">
         <input type="text" id="urlInput"
-               placeholder="Enter any site (e.g. example.com)"
+               placeholder="enter site or search term"
                autocomplete="off">
         <button id="goBtn">Go</button>
     </div>
 
     <p class="note">
-        powered by <code>api.allorigins.win</code> – loads most sites.  
-        some sites may not work, be advised of this
+        powered by allorigins - some sites may not work
     </p>
 
     <iframe id="proxyFrame"
@@ -114,31 +113,55 @@
 </div>
 
 <script>
-    // Only working proxy
     const proxyBase = 'https://api.allorigins.win/raw?url=';
+    const ddgBase   = 'https://html.duckduckgo.com/html/?q=';
 
     const input = document.getElementById('urlInput');
     const btn   = document.getElementById('goBtn');
     const frame = document.getElementById('proxyFrame');
 
+    // Detect if input looks like a URL
+    function isValidUrl(str) {
+        const trimmed = str.trim();
+        if (!trimmed) return false;
+
+        // Has a dot and no spaces → likely a domain
+        if (trimmed.includes('.') && !trimmed.includes(' ')) return true;
+
+        // Starts with http:// or https://
+        if (/^https?:\/\//i.test(trimmed)) return true;
+
+        return false;
+    }
+
     function normalizeUrl(str) {
-        str = str.trim();
-        if (!str) return '';
-        if (!/^https?:\/\//i.test(str)) str = 'https://' + str;
-        return str;
+        let url = str.trim();
+        if (!/^https?:\/\//i.test(url)) {
+            url = 'https://' + url;
+        }
+        return url;
     }
 
     function loadSite() {
-        const raw = normalizeUrl(input.value);
+        const raw = input.value.trim();
         if (!raw) {
-            alert('Please enter a website.');
+            alert('Please enter a site or search term.');
             return;
         }
 
-        const proxied = proxyBase + encodeURIComponent(raw);
-        frame.src = proxied;
+        let target;
 
-        // Keep URL 100% clean
+        if (isValidUrl(raw)) {
+            // It's a site → proxy it
+            target = proxyBase + encodeURIComponent(normalizeUrl(raw));
+        } else {
+            // It's a search → DuckDuckGo (HTML version, no JS tracking)
+            target = ddgBase + encodeURIComponent(raw);
+        }
+
+        frame.src = target;
+
+        // Keep URL clean
         history.replaceState(null, '', location.pathname);
     }
 
