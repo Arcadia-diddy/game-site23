@@ -5,169 +5,259 @@
     <title>have fun</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#121212;color:#e0e0e0;line-height:1.6}
-        header{background:#1f1f1f;color:#00bfff;padding:1.2rem;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.3);position:relative}
-        header h1{margin:0;font-size:1.8rem;font-weight:600}
-        .home-link,.fullscreen-btn{position:absolute;top:50%;transform:translateY(-50%);background:#333;color:#00bfff;border:1px solid #00bfff;padding:.5rem .8rem;border-radius:6px;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s}
-        .home-link{left:1rem}
-        .home-link:hover,.fullscreen-btn:hover{background:#00bfff;color:#121212}
-        .fullscreen-btn{right:1rem}
-        .fullscreen-btn .icon{font-size:1.1rem}
-        .container{max-width:900px;margin:2rem auto;padding:0 1rem}
-        .search{display:flex;gap:.6rem;margin-bottom:1.2rem;background:#1e1e1e;padding:.8rem;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.2)}
-        input[type=text]{flex:1;padding:.75rem 1rem;font-size:1rem;background:#2d2d2d;color:#fff;border:1px solid #444;border-radius:6px;outline:none;transition:border .2s}
-        input[type=text]:focus{border-color:#00bfff;box-shadow:0 0 0 2px rgba(0,191,255,.2)}
-        button{padding:.75rem 1.5rem;font-size:1rem;font-weight:600;background:#00bfff;color:#121212;border:none;border-radius:6px;cursor:pointer;transition:background .2s}
-        button:hover{background:#009edc}
-        iframe{width:100%;height:calc(100vh - 200px);border:none;border-top:1px solid #333;background:#000;border-radius:0 0 8px 8px}
-        .note{font-size:.85rem;color:#888;margin-top:.8rem;text-align:center}
-        .note code{background:#2d2d2d;padding:2px 6px;border-radius:4px;font-family:'Courier New',monospace}
-        .fullscreen .container{max-width:none;margin:0;padding:0}
-        .fullscreen .search{border-radius:0;margin-bottom:0}
-        .fullscreen iframe{height:calc(100vh - 120px);border-radius:0;border-top:none}
-        .fullscreen .note{display:none}
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #121212;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+        header {
+            background: #1f1f1f;
+            color: #00bfff;
+            padding: 1.2rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        /* Home button */
+        .home-link {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #333;
+            color: #00bfff;
+            border: 1px solid #00bfff;
+            padding: .5rem 1rem;
+            border-radius: 6px;
+            font-size: .9rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .home-link:hover {
+            background: #00bfff;
+            color: #121212;
+        }
+
+        /* Fullscreen button - top right */
+        .fullscreen-btn {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #333;
+            color: #00bfff;
+            border: 1px solid #00bfff;
+            padding: .5rem .8rem;
+            border-radius: 6px;
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            line-height: 1;
+        }
+        .fullscreen-btn:hover {
+            background: #00bfff;
+            color: #121212;
+        }
+        .fullscreen-btn .icon {
+            font-size: 1.1rem;
+            display: inline-block;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .search {
+            display: flex;
+            gap: .6rem;
+            margin-bottom: 1.2rem;
+            background: #1e1e1e;
+            padding: .8rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        input[type=text] {
+            flex: 1;
+            padding: .75rem 1rem;
+            font-size: 1rem;
+            background: #2d2d2d;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 6px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        input[type=text]:focus {
+            border-color: #00bfff;
+            box-shadow: 0 0 0 2px rgba(0,191,255,0.2);
+        }
+        button {
+            padding: .75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            background: #00bfff;
+            color: #121212;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #009edc;
+        }
+        iframe {
+            width: 100%;
+            height: calc(100vh - 200px);
+            border: none;
+            border-top: 1px solid #333;
+            background: #000;
+            border-radius: 0 0 8px 8px;
+        }
+        .note {
+            font-size: .85rem;
+            color: #888;
+            margin-top: .8rem;
+            text-align: center;
+        }
+        .note code {
+            background: #2d2d2d;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Fullscreen styles */
+        .fullscreen .container {
+            max-width: none;
+            margin: 0;
+            padding: 0;
+        }
+        .fullscreen .search {
+            border-radius: 0;
+            margin-bottom: 0;
+        }
+        .fullscreen iframe {
+            height: calc(100vh - 120px);
+            border-radius: 0;
+            border-top: none;
+        }
+        .fullscreen .note {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
 <header>
     <a href="/" class="home-link">Home</a>
-    <h1>brows</h1>
+    <h1>browse</h1>
     <button id="fullscreenBtn" class="fullscreen-btn" title="Toggle Fullscreen">
-        <span class="icon">Full screen</span>
+        <span class="icon">⛶</span>
     </button>
 </header>
 
 <div class="container">
     <div class="search">
-        <input type="text" id="urlInput" placeholder="enter site or search term" autocomplete="off">
+        <input type="text" id="urlInput"
+               placeholder="enter site or search term"
+               autocomplete="off">
         <button id="goBtn">Go</button>
     </div>
-    <p class="note">powered by allorigins – some sites may not work</p>
+
+    <p class="note">
+        powered by allorigins - some sites may not work
+    </p>
+
     <iframe id="proxyFrame"
             sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups">
     </iframe>
 </div>
 
 <script>
-    const PROXY_BASE = 'https://api.allorigins.win/raw?url=';
-    const input   = document.getElementById('urlInput');
-    const goBtn   = document.getElementById('goBtn');
-    const frame   = document.getElementById('proxyFrame');
-    const fsBtn   = document.getElementById('fullscreenBtn');
-    const fsIcon  = fsBtn.querySelector('.icon');
+    const proxyBase = 'https://api.allorigins.win/raw?url=';
+    const input = document.getElementById('urlInput');
+    const btn   = document.getElementById('goBtn');
+    const frame = document.getElementById('proxyFrame');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const icon = fullscreenBtn.querySelector('.icon');
 
-    /* ---------- FULLSCREEN ---------- */
-    fsBtn.addEventListener('click', () => {
+    // Fullscreen toggle
+    fullscreenBtn.addEventListener('click', () => {
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen()
-                .then(() => { document.body.classList.add('fullscreen'); fsIcon.textContent='Exit full screen'; })
-                .catch(() => {});
+            document.documentElement.requestFullscreen().then(() => {
+                document.body.classList.add('fullscreen');
+                icon.textContent = '✖';
+            }).catch(err => {
+                console.error(`Error attempting to enable fullscreen: ${err.message}`);
+            });
         } else {
-            document.exitFullscreen()
-                .then(() => { document.body.classList.remove('fullscreen'); fsIcon.textContent='Full screen'; });
+            document.exitFullscreen().then(() => {
+                document.body.classList.remove('fullscreen');
+                icon.textContent = '⛶';
+            });
         }
     });
+
+    // Update icon when fullscreen changes externally
     document.addEventListener('fullscreenchange', () => {
         if (document.fullscreenElement) {
             document.body.classList.add('fullscreen');
-            fsIcon.textContent='Exit full screen';
+            icon.textContent = '✖';
         } else {
             document.body.classList.remove('fullscreen');
-            fsIcon.textContent='Full screen';
+            icon.textContent = '⛶';
         }
     });
 
-    /* ---------- URL HELPERS ---------- */
-    const isValidUrl = s => {
-        const t = s.trim();
-        return t && ((t.includes('.') && !t.includes(' ')) || /^https?:\/\//i.test(t));
-    };
-    const normalizeUrl = s => {
-        let u = s.trim();
-        if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
-        return u;
-    };
+    function isValidUrl(str) {
+        const trimmed = str.trim();
+        if (!trimmed) return false;
+        if (trimmed.includes('.') && !trimmed.includes(' ')) return true;
+        if (/^https?:\/\//i.test(trimmed)) return true;
+        return false;
+    }
 
-    /* ---------- PROXY WATCHER (runs inside iframe) ---------- */
-    const watcher = `
-        <script>
-            (function(){
-                const PROXY = "${PROXY_BASE}";
-                const proxify = u => {
-                    try {
-                        return PROXY + encodeURIComponent(new URL(u, location.href).href);
-                    } catch(e) {
-                        return PROXY + encodeURIComponent(u);
-                    }
-                };
+    function normalizeUrl(str) {
+        let url = str.trim();
+        if (!/^https?:\/\//i.test(url)) {
+            url = 'https://' + url;
+        }
+        return url;
+    }
 
-                // Intercept link clicks
-                document.addEventListener('click', e => {
-                    const a = e.target.closest('a');
-                    if (a && a.href && a.target !== '_blank') {
-                        e.preventDefault();
-                        location.href = proxify(a.href);
-                    }
-                }, true);
-
-                // Intercept GET form submissions
-                document.addEventListener('submit', e => {
-                    const f = e.target;
-                    if (f.method.toUpperCase() === 'GET') {
-                        e.preventDefault();
-                        const action = f.action || location.href;
-                        const params = new URLSearchParams(new FormData(f));
-                        const query = params.toString();
-                        const sep = action.includes('?') ? '&' : '?';
-                        location.href = proxify(action + (query ? sep + query : ''));
-                    }
-                }, true);
-
-                // Rewrite history.pushState / replaceState
-                const push = history.pushState;
-                const replace = history.replaceState;
-                history.pushState = function(state, title, url) {
-                    return push.call(this, state, title, url ? proxify(url) : url);
-                };
-                history.replaceState = function(state, title, url) {
-                    return replace.call(this, state, title, url ? proxify(url) : url);
-                };
-            })();
-        <\/script>`;
-
-    /* ---------- LOAD SITE ---------- */
     function loadSite() {
         const raw = input.value.trim();
         if (!raw) {
-            alert('Enter a site or search term.');
+            alert('Please enter a site or search term.');
             return;
         }
 
-        const target = isValidUrl(raw)
-            ? normalizeUrl(raw)
-            : 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(raw);
+        let targetUrl;
 
-        const proxied = PROXY_BASE + encodeURIComponent(target);
+        if (isValidUrl(raw)) {
+            targetUrl = normalizeUrl(raw);
+        } else {
+            targetUrl = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(raw);
+        }
 
-        // Step 1: Load watcher script first
-        frame.srcdoc = watcher + `<body style="background:#000; margin:0;"></body>`;
+        frame.src = proxyBase + encodeURIComponent(targetUrl);
 
-        // Step 2: After watcher loads, navigate to real site
-        frame.onload = function() {
-            try {
-                frame.contentWindow.location.replace(proxied);
-            } catch (e) {
-                console.error('Failed to navigate iframe:', e);
-            }
-            frame.onload = null; // Prevent infinite loop
-        };
-
+        // Keep URL clean
         history.replaceState(null, '', location.pathname);
     }
 
-    goBtn.addEventListener('click', loadSite);
+    btn.addEventListener('click', loadSite);
     input.addEventListener('keydown', e => {
         if (e.key === 'Enter') loadSite();
     });
