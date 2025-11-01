@@ -15,8 +15,25 @@
       display:flex;
       justify-content:center;
     }
-    .container{max-width:400px;width:100%;margin:2rem auto;background:#111;border-radius:16px;padding:1.5rem;box-shadow:0 0 20px rgba(0,255,0,.2)}
+    .container{
+      max-width:400px;width:100%;margin:2rem auto;background:#111;
+      border-radius:16px;padding:1.5rem;box-shadow:0 0 20px rgba(0,255,0,.2);
+      position:relative;
+    }
     h1{font-size:1.8rem;text-align:center;margin-bottom:1rem;color:#0f0}
+    
+    /* REQUEST BUTTON */
+    .request-btn{
+      position:absolute;top:1rem;right:1rem;
+      background:#0f0;color:#000;padding:0.5rem 1rem;
+      border:none;border-radius:8px;font-size:0.8rem;
+      font-weight:600;cursor:pointer;transition:.3s;
+      box-shadow:0 0 10px rgba(0,255,0,.3);
+    }
+    .request-btn:hover{
+      transform:scale(1.08);background:#2f2;
+    }
+
     .cover{
       width:100%;height:250px;object-fit:cover;border-radius:12px;margin-bottom:1rem;
       background:#222;display:flex;align-items:center;justify-content:center;
@@ -43,23 +60,22 @@
     }
     .volume-container input{
       flex:1;height:4px;border-radius:2px;background:#333;outline:none;
-      -webkit-appearance:none;
-      appearance:none;
+      -webkit-appearance:none;appearance:none;
     }
     .volume-container input::-webkit-slider-thumb{
-      -webkit-appearance:none;
-      appearance:none;
+      -webkit-appearance:none;appearance:none;
       width:14px;height:14px;background:#0f0;border-radius:50%;cursor:pointer
     }
     .volume-container input::-moz-range-thumb{
       width:14px;height:14px;background:#0f0;border-radius:50%;cursor:pointer;border:none
     }
     .playlist{
-      list-style:none;max-height:200px;overflow-y:auto;margin-top:1rem;border-top:1px solid #333;padding-top:1rem
+      list-style:none;max-height:200px;overflow-y:auto;margin-top:1rem;
+      border-top:1px solid #333;padding-top:1rem
     }
     .playlist li{
-      padding:0.6rem 0.8rem;border-radius:8px;margin:0.3rem 0;cursor:pointer;transition:.2s;
-      display:flex;justify-content:space-between;align-items:center
+      padding:0.6rem 0.8rem;border-radius:8px;margin:0.3rem 0;
+      cursor:pointer;transition:.2s;display:flex;justify-content:space-between;align-items:center
     }
     .playlist li:hover{background:#222}
     .playlist li.playing{background:#0f0;color:#000;font-weight:600}
@@ -68,6 +84,9 @@
 </head>
 <body>
   <div class="container">
+    <!-- REQUEST SONG BUTTON -->
+    <button class="request-btn" onclick="openRequestForm()">Request Song</button>
+
     <h1>dis ya fav music amirite</h1>
 
     <div class="cover" id="cover">
@@ -83,9 +102,7 @@
       <div class="progress" id="progress"></div>
     </div>
     <div class="time">
-      <span
-
- id="current">0:00</span>
+      <span id="current">0:00</span>
       <span id="duration">0:00</span>
     </div>
 
@@ -104,7 +121,12 @@
   </div>
 
   <script>
-    // === YOUR MUSIC (ADD .MP3 FILES HERE) ===
+    // === OPEN SONG REQUEST FORM ===
+    function openRequestForm() {
+      window.open('https://forms.gle/tUcw56D1BJdSNFbK8', '_blank');
+    }
+
+    // === YOUR MUSIC (UNCHANGED) ===
     const songs = [
       { title: "Habits", artist: "Osamason", src: "music/songs/Habits_KLICKAUD.mp3", cover: "music/album covers/osamason.png" },
       { title: "Addicted", artist: "Osamason", src: "music/songs/Addicted_KLICKAUD.mp3", cover: "music/album covers/osamason.png" },
@@ -118,7 +140,6 @@
       { title: "42 Song", artist: "Blizzi Boi", src: "music/songs/42song.mp3", cover: "music/album covers/42but.png" },
       { title: "Tamale", artist: "Tyler, The Creator", src: "music/songs/tamale.mp3", cover: "music/album covers/tyler.png" },
       { title: "Blood Soda", artist: "Jaydes only because yuke sucks", src: "music/songs/blood soda.mp3", cover: "music/album covers/blood soda.png" },
-      // ADD MORE: { title: "Name", artist: "Artist", src: "music/file.mp3", cover: "music/img.jpg" },
     ];
 
     // === ELEMENTS ===
