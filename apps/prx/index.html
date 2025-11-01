@@ -18,11 +18,32 @@
             padding: 1.2rem;
             text-align: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: relative;
         }
         header h1 {
             margin: 0;
             font-size: 1.8rem;
             font-weight: 600;
+        }
+        .home-btn {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #333;
+            color: #00bfff;
+            border: 1px solid #00bfff;
+            padding: .5rem 1rem;
+            border-radius: 6px;
+            font-size: .9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: none;
+            transition: all 0.2s;
+        }
+        .home-btn:hover {
+            background: #00bfff;
+            color: #121212;
         }
         .container {
             max-width: 900px;
@@ -92,6 +113,7 @@
 <body>
 
 <header>
+    <button class="home-btn" id="homeBtn">Home</button>
     <h1>browse</h1>
 </header>
 
@@ -114,12 +136,11 @@
 
 <script>
     const proxyBase = 'https://api.allorigins.win/raw?url=';
-
     const input = document.getElementById('urlInput');
     const btn   = document.getElementById('goBtn');
     const frame = document.getElementById('proxyFrame');
+    const homeBtn = document.getElementById('homeBtn');
 
-    // Detect if input looks like a URL
     function isValidUrl(str) {
         const trimmed = str.trim();
         if (!trimmed) return false;
@@ -146,23 +167,37 @@
         let targetUrl;
 
         if (isValidUrl(raw)) {
-            // It's a site → proxy it
             targetUrl = normalizeUrl(raw);
         } else {
-            // It's a search → DuckDuckGo HTML version (via proxy)
             targetUrl = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(raw);
         }
 
-        // Always go through allorigins to avoid iframe blocks
         frame.src = proxyBase + encodeURIComponent(targetUrl);
+
+        // Show Home button
+        homeBtn.style.display = 'block';
 
         // Keep URL clean
         history.replaceState(null, '', location.pathname);
     }
 
+    // Go button
     btn.addEventListener('click', loadSite);
     input.addEventListener('keydown', e => {
         if (e.key === 'Enter') loadSite();
+    });
+
+    // Home button: reset to start page
+    homeBtn.addEventListener('click', () => {
+        frame.src = 'about:blank';  // Clear iframe
+        input.value = '';
+        input.focus();
+        homeBtn.style.display = 'none';  // Hide button
+    });
+
+    // Optional: hide home button on page load
+    window.addEventListener('load', () => {
+        homeBtn.style.display = 'none';
     });
 </script>
 
