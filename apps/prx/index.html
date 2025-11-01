@@ -65,7 +65,7 @@
         <button id="goBtn">Go</button>
     </div>
 
-    <!-- YOUR ORIGINAL NOTE - NEVER CHANGED -->
+    <!-- YOUR NOTE - NEVER CHANGED -->
     <p class="note">
         powered by allorigins - some sites may not work
     </p>
@@ -81,7 +81,7 @@
     const frame   = document.getElementById('proxyFrame');
     const fsBtn   = document.getElementById('fsBtn');
 
-    const PROXY_PAGE = location.href.split('?')[0];
+    const PROXY_PAGE = location.pathname;  // e.g. /proxy
 
     function isValidUrl(s){
         const t=s.trim();
@@ -93,38 +93,30 @@
         return u;
     }
 
-    // Read ?url= from current URL
-    const urlParam = new URLSearchParams(location.search).get('url');
-    if (urlParam) {
-        input.value = decodeURIComponent(urlParam);
-        setTimeout(loadSite, 100);
-    }
+    let currentTarget = '';
 
     async function loadSite(){
-        const raw = input.value.trim() || urlParam;
+        const raw = input.value.trim();
         if(!raw) return alert('Enter a site or search term');
 
-        const target = isValidUrl(raw)
+        currentTarget = isValidUrl(raw)
             ? normalizeUrl(raw)
             : 'https://html.duckduckgo.com/html/?q='+encodeURIComponent(raw);
 
         try{
-            const r = await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(target));
+            const r = await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(currentTarget));
             if(!r.ok) throw new Error('fetch failed');
             const html = await r.text();
 
-            // INJECTED SCRIPT - SAFE, NO top, NO ERRORS
             const inj = `<script>
                 const PROXY = "${PROXY_PAGE}";
-                const BASE  = "${target.split('/').slice(0,3).join('/')}";
+                const BASE  = "${currentTarget.split('/').slice(0,3).join('/')}";
 
-                // Helper: go through proxy
                 function go(url) {
                     const abs = url.startsWith('http') ? url : new URL(url, location.href).href;
-                    window.parent.location = PROXY + '?url=' + encodeURIComponent(abs);
+                    parent.postMessage({type:'proxy',url:abs}, '*');
                 }
 
-                // Links
                 document.addEventListener('click', e => {
                     const a = e.target.closest('a');
                     if (!a || a.target === '_blank' || a.href.startsWith('javascript:')) return;
@@ -132,7 +124,6 @@
                     go(a.href);
                 }, true);
 
-                // Forms
                 document.addEventListener('submit', e => {
                     const f = e.target;
                     if (f.target === '_blank') return;
@@ -145,16 +136,12 @@
                     go(url.href);
                 });
 
-                // location.href / assign / replace
                 ['href','assign','replace'].forEach(m => {
                     const orig = location[m];
                     location[m] = function(u) {
                         const abs = u.startsWith('http') ? u : new URL(u, location.href).href;
-                        if (abs.startsWith(BASE)) {
-                            go(abs);
-                        } else {
-                            orig.call(this, u);
-                        }
+                        if (abs.startsWith(BASE)) go(abs);
+                        else orig.call(this, u);
                     };
                 });
             <\/script>`;
@@ -164,13 +151,29 @@
 
             fsBtn.style.display = 'block';
 
-            // Update URL with ?url= but keep it clean in address bar
-            history.replaceState(null, '', PROXY_PAGE + '?url=' + encodeURIComponent(target));
+            // CLEAN URL - NO ?url= EVER
+            history.replaceState({target: currentTarget}, '', PROXY_PAGE);
 
         }catch(e){
             frame.srcdoc = `<h1 style="color:red;text-align:center;margin-top:100px;">
                             Failed to load: ${e.message}</h1>`;
         }
+    }
+
+    // Listen for proxy requests from iframe
+    window.addEventListener('message', e => {
+        if (e.data.type === 'proxy' && e.data.url) {
+            currentTarget = e.data.url;
+            input.value = currentTarget;
+            loadSite();
+        }
+    });
+
+    // Load from history state
+    if (history.state && history.state.target) {
+        currentTarget = history.state.target;
+        input.value = currentTarget;
+        setTimeout(loadSite, 100);
     }
 
     btn.addEventListener('click', loadSite);
