@@ -25,9 +25,8 @@
             font-size: 1.8rem;
             font-weight: 600;
         }
-        .home-link {
+        .home-link, .fs-btn {
             position: absolute;
-            left: 1rem;
             top: 50%;
             transform: translateY(-50%);
             background: #333;
@@ -37,11 +36,13 @@
             border-radius: 6px;
             font-size: .9rem;
             font-weight: 600;
-            text-decoration: none;
             cursor: pointer;
             transition: all 0.2s;
+            text-decoration: none;
         }
-        .home-link:hover {
+        .home-link { left: 1rem; }
+        .fs-btn { right: 1rem; }
+        .home-link:hover, .fs-btn:hover {
             background: #00bfff;
             color: #121212;
         }
@@ -68,7 +69,6 @@
             border: 1px solid #444;
             border-radius: 6px;
             outline: none;
-            transition: border 0.2s;
         }
         input[type=text]:focus {
             border-color: #00bfff;
@@ -83,11 +83,8 @@
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            transition: background 0.2s;
         }
-        button:hover {
-            background: #009edc;
-        }
+        button:hover { background: #009edc; }
         iframe {
             width: 100%;
             height: calc(100vh - 200px);
@@ -95,6 +92,7 @@
             border-top: 1px solid #333;
             background: #000;
             border-radius: 0 0 8px 8px;
+            transition: all 0.3s;
         }
         .note {
             font-size: .85rem;
@@ -114,127 +112,134 @@
 
 <header>
     <a href="/" class="home-link">Home</a>
-    <h1>brows</h1>
+    <h1>browse</h1>
+    <button class="fs-btn" id="fsBtn">Fullscreen</button>
 </header>
 
 <div class="container">
     <div class="search">
-        <input type="text" id="urlInput"
-               placeholder="enter site or search term"
-               autocomplete="off">
+        <input type="text" id="urlInput" placeholder="enter site or search term" autocomplete="off">
         <button id="goBtn">Go</button>
     </div>
 
     <p class="note">
-        powered by allorigins - links stay in proxy
+        powered by allorigins - some links may not work
     </p>
 
-    <iframe id="proxyFrame"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-top-navigation-by-user-activation">
-    </iframe>
+    <iframe id="proxyFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"></iframe>
 </div>
 
 <script>
-    const proxyBase = 'https://api.allorigins.win/raw?url=';
     const input = document.getElementById('urlInput');
     const btn   = document.getElementById('goBtn');
     const frame = document.getElementById('proxyFrame');
+    const fsBtn = document.getElementById('fsBtn');
 
-    // Your proxy page URL (e.g. /proxy or /browse.html)
-    const PROXY_PAGE_URL = location.href.split('?')[0];  // Clean URL
+    const PROXY_PAGE = location.href.split('?')[0];  // e.g. /proxy
 
     function isValidUrl(str) {
-        const trimmed = str.trim();
-        if (!trimmed) return false;
-        if (trimmed.includes('.') && !trimmed.includes(' ')) return true;
-        if (/^https?:\/\//i.test(trimmed)) return true;
-        return false;
+        const t = str.trim();
+        return t && (t.includes('.') && !t.includes(' ')) || /^https?:\/\//i.test(t);
     }
 
     function normalizeUrl(str) {
         let url = str.trim();
-        if (!/^https?:\/\//i.test(url)) {
-            url = 'https://' + url;
-        }
+        if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
         return url;
     }
 
-    function loadSite() {
+    async function loadSite() {
         const raw = input.value.trim();
-        if (!raw) {
-            alert('Please enter a site or search term.');
-            return;
+        if (!raw) return alert('Enter a site or search term');
+
+        let targetUrl = isValidUrl(raw)
+            ? normalizeUrl(raw)
+            : 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(raw);
+
+        try {
+            // Fetch via allorigins
+            const resp = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl));
+            if (!resp.ok) throw new Error('Failed to fetch');
+
+            const html = await resp.text();
+
+            // Inject proxy-rewriting script
+            const proxyScript = `
+                <script>
+                    const PROXY = "${PROXY_PAGE}";
+                    const BASE = "${targetUrl.split('/').slice(0,3).join('/')}";
+                    // Rewrite all links
+                    document.addEventListener('click', e => {
+                        const a = e.target.closest('a');
+                        if (!a || a.target === '_blank') return;
+                        e.preventDefault();
+                        const href = a.getAttribute('href') || '';
+                        const url = href.startsWith('http') ? href : new URL(href, location.href).href;
+                        location.href = PROXY + '?url=' + encodeURIComponent(url);
+                    }, true);
+                    // Forms
+                    document.addEventListener('submit', e => {
+                        const f = e.target;
+                        if (f.target === '_blank') return;
+                        e.preventDefault();
+                        const action = f.action || location.href;
+                        const url = new URL(action, location.href);
+                        if (f.method.toUpperCase() === 'GET') {
+                            for (let [k,v] of new FormData(f)) url.searchParams.append(k,v);
+                        }
+                        location.href = PROXY + '?url=' + encodeURIComponent(url.href);
+                    });
+                    // location.href / assign / replace
+                    ['href','assign','replace'].forEach(m => {
+                        const orig = location[m];
+                        location[m] = function(u) {
+                            const url = u.startsWith('http') ? u : new URL(u, location.href).href;
+                            if (url.startsWith(BASE)) {
+                                top.location.href = PROXY + '?url=' + encodeURIComponent(url);
+                            } else {
+                                orig.call(this, u);
+                            }
+                        };
+                    });
+                </script>
+            `;
+
+            // Build final HTML
+            const finalHtml = html.replace(/<\/head>/i, proxyScript + '</head>');
+
+            // Use srcdoc to avoid CORS
+            frame.srcdoc = finalHtml;
+
+            // Show fullscreen button
+            fsBtn.style.display = 'block';
+
+        } catch (e) {
+            frame.srcdoc = `<h1 style="color:red;text-align:center;margin-top:100px;">Failed to load: ${e.message}</h1>`;
         }
 
-        let targetUrl;
-
-        if (isValidUrl(raw)) {
-            targetUrl = normalizeUrl(raw);
-        } else {
-            targetUrl = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(raw);
-        }
-
-        // Load via allorigins + inject link-rewriting script
-        const proxyUrl = proxyBase + encodeURIComponent(targetUrl);
-        const fullUrl = proxyUrl + '&_proxy_rewrite=1';
-
-        frame.src = fullUrl;
-
-        // Keep URL clean
         history.replaceState(null, '', location.pathname);
     }
 
     btn.addEventListener('click', loadSite);
-    input.addEventListener('keydown', e => {
-        if (e.key === 'Enter') loadSite();
-    });
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') loadSite(); });
 
-    // === LINK REWRITING INSIDE IFRAME ===
-    frame.addEventListener('load', () => {
-        try {
-            const doc = frame.contentDocument || frame.contentWindow.document;
-
-            // Inject script to rewrite ALL links
-            const script = doc.createElement('script');
-            script.textContent = `
-                (function() {
-                    const PROXY_PAGE = "${PROXY_PAGE_URL}";
-                    document.addEventListener('click', function(e) {
-                        let a = e.target.closest('a');
-                        if (!a) return;
-                        if (a.target === '_blank') return; // Let real new tabs open
-                        e.preventDefault();
-                        const url = a.href;
-                        if (url && url.startsWith('http')) {
-                            const proxied = "${proxyBase}" + encodeURIComponent(url);
-                            location.href = PROXY_PAGE + '?url=' + encodeURIComponent(url);
-                        } else if (url) {
-                            location.href = url;
-                        }
-                    }, true);
-
-                    // Also rewrite form submissions
-                    document.addEventListener('submit', function(e) {
-                        const form = e.target;
-                        if (form.target === '_blank') return;
-                        const action = form.action;
-                        if (action && action.startsWith('http')) {
-                            e.preventDefault();
-                            const method = form.method.toUpperCase();
-                            const data = new FormData(form);
-                            const url = new URL(action);
-                            for (let [k, v] of data) url.searchParams.append(k, v);
-                            const finalUrl = method === 'GET' ? url.toString() : action;
-                            location.href = PROXY_PAGE + '?url=' + encodeURIComponent(finalUrl);
-                        }
-                    });
-                })();
-            `;
-            doc.head.appendChild(script);
-        } catch (e) {
-            console.log("Cannot inject into iframe (CORS or sandbox)");
+    // Fullscreen toggle
+    fsBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            frame.requestFullscreen().catch(() => {});
+            fsBtn.textContent = 'Exit';
+        } else {
+            document.exitFullscreen();
+            fsBtn.textContent = 'Fullscreen';
         }
     });
+
+    document.addEventListener('fullscreenchange', () => {
+        fsBtn.textContent = document.fullscreenElement ? 'Exit' : 'Fullscreen';
+    });
+
+    // Hide fullscreen button initially
+    fsBtn.style.display = 'none';
 </script>
 
 </body>
