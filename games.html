@@ -27,6 +27,30 @@
     .card a{color:var(--glow);font-weight:600;text-decoration:none;display:block;margin-top:.5rem}
     .card img{width:100%;height:120px;object-fit:cover;border-radius:8px;background:#333}
     .no-results{display:none;text-align:center;color:#f66;margin:2rem;font-size:1.1rem}
+
+    /* NEW: External Link Button */
+    .external-btn {
+      display: inline-block;
+      margin: 1rem auto;
+      padding: 0.8rem 1.8rem;
+      background: linear-gradient(135deg, var(--glow), var(--accent));
+      color: white;
+      font-weight: 600;
+      font-size: 1.1rem;
+      text-decoration: none;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+      text-align: center;
+    }
+    .external-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 255, 136, 0.5);
+    }
+    .btn-container {
+      text-align: center;
+      margin: 1rem 0;
+    }
   </style>
 </head>
 <body>
@@ -44,6 +68,13 @@
     <input type="text" id="searchInput" placeholder="Search games..." autocomplete="off">
   </div>
 
+  <!-- NEW: External Link Button -->
+  <div class="btn-container">
+    <a href="https://discord.gg/yourserver" target="_blank" class="external-btn" id="externalLink">
+      Join Our Discord
+    </a>
+  </div>
+
   <div class="grid" id="gameGrid">
     <!-- GAMES ADDED BY JS -->
   </div>
@@ -51,6 +82,17 @@
   <p class="no-results" id="noResults">No games found.</p>
 
   <script>
+    // === CONFIGURE YOUR EXTERNAL LINK HERE ===
+    const EXTERNAL_LINK = {
+      text: "Request Games",           // Button text
+      url: "https://forms.gle/jADcSQuoz4GB5wgC9" // Change this to your link
+    };
+
+    // Update button dynamically
+    const btn = document.getElementById('externalLink');
+    btn.textContent = EXTERNAL_LINK.text;
+    btn.href = EXTERNAL_LINK.url;
+
     // === GAME DATA (EDIT THIS!) ===
     const games = [
       { name: '2048', file: 'games/2048/index.html', img: 'games/2048/screenshot.png' },
@@ -77,7 +119,10 @@
       { name: 'OMORI', file: 'games/omori/OMORI.html', img: 'games/omori/image.png' },
       { name: 'Papers, Please', file: 'games/papersplease/Papers, Please.html', img: 'games/papersplease/image.png' },
       { name: 'Webfishing', file: 'games/webfishing/webfishing.html', img: 'games/webfishing/image.png' },
-      // ADD MORE: { name: 'Your Game', file: 'games/folder/game.html', img: 'games/folder/img.png' },
+      { name: 'Bouncemasters', file: 'games/bouncemasters/Bouncemasters.html', img: 'games/bouncemasters/image.png' },
+      { name: 'Rainbow Obby', file: 'games/rainbow/Rainbow Obby.html', img: 'games/rainbow/image.png' },
+      { name: 'Class Of 09', file: 'games/classof/Class Of 09.html', img: 'games/classof/image.png' },
+      { name: 'Hotline Miami', file: 'games/hotline/Hotline Miami.html', img: 'games/hotline/image.png' },
     ];
 
     // === SORT ALPHABETICALLY (A-Z) ===
