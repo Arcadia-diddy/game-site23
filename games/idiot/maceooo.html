@@ -11,24 +11,28 @@
             background: #111;
             color: white;
             font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
         }
 
         .row {
             display: flex;
             width: 100%;
-            height: 85%; /* images take most of the screen */
+            height: calc(100% - 40px); /* leave room for text */
         }
 
         img {
             width: 50%;
             height: 100%;
-            object-fit: cover; /* stretches to fill without distortion */
+            object-fit: fill; /* <-- forces stretching */
         }
 
         p {
+            height: 40px;
+            margin: 0;
             text-align: center;
+            line-height: 40px;
             font-size: 22px;
-            margin: 10px 0 0 0;
         }
     </style>
 </head>
@@ -39,7 +43,7 @@
         <img src="shur2.png" alt="maceoooo2">
     </div>
 
-    <p>what is this maceo /p>
+    <p>what is this maceo</p>
 
 </body>
 </html>
