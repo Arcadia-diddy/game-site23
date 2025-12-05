@@ -7,32 +7,32 @@
             margin: 0;
             padding: 0;
             height: 100%;
-            overflow: hidden; /* no scrolling */
+            overflow: hidden;
             background: #111;
-            color: white;
             font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
         }
 
         .row {
             display: flex;
             width: 100%;
-            height: calc(100% - 40px); /* leave room for text */
+            height: 100%;
         }
 
         img {
             width: 50%;
             height: 100%;
-            object-fit: fill; /* <-- forces stretching */
+            object-fit: fill; /* stretches to fit exactly */
         }
 
-        p {
-            height: 40px;
-            margin: 0;
-            text-align: center;
-            line-height: 40px;
-            font-size: 60px;
+        .center-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 100px;
+            text-shadow: 0 0 10px black;
+            pointer-events: none; /* text doesn't block clicking */
         }
     </style>
 </head>
@@ -43,7 +43,7 @@
         <img src="shur2.png" alt="maceoooo2">
     </div>
 
-    <p>what is this maceo</p>
+    <div class="center-text">what is this maceo</div>
 
 </body>
 </html>
