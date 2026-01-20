@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Easter Egg Page</title>
+
+  <!-- Google Font: Orbitron -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== CUSTOMIZATION SECTION ===== */
+    :root {
+      --bg-color: #fffae3;           
+      --text-color: #333;            
+      --accent-color: #ff6f61;       
+      --font-family: 'Orbitron', sans-serif; 
+      --image-url: 'https://placekitten.com/400/300'; 
+      --sound-url: '';                
+    }
+
+    /* ===== PAGE STYLING ===== */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-family);
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 0.2em;
+    }
+
+    p {
+      font-size: 1.2em;
+      margin-bottom: 1em;
+    }
+
+    button {
+      background-color: var(--accent-color);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.1);
+      background-color: #ff4a3a;
+    }
+
+    img {
+      max-width: 80%;
+      border-radius: 20px;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    img:hover {
+      transform: rotate(10deg) scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <h1>Easter Egg Found!</h1>
+  <p>Click the image to reveal a surprise.</p>
+  
+  <img src="https://placekitten.com/400/300" alt="Easter Egg Image" id="eggImage">
+  
+  <button id="customButton">Click Me!</button>
+
+  <script>
+    const img = document.getElementById('eggImage');
+    const button = document.getElementById('customButton');
+
+    img.addEventListener('click', () => {
+      alert('🎉 Surprise! You found the hidden message!');
+      const audioUrl = getComputedStyle(document.documentElement).getPropertyValue('--sound-url').trim();
+      if(audioUrl){
+        new Audio(audioUrl).play();
+      }
+    });
+
+    button.addEventListener('click', () => {
+      document.body.style.backgroundColor = getRandomColor();
+      button.textContent = '🎊 Yay! 🎊';
+    });
+
+    function getRandomColor() {
+      return '#' + Math.floor(Math.random()*16777215).toString(16);
+    }
+  </script>
+</body>
+</html>
