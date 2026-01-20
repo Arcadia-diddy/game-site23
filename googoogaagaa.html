@@ -4,19 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Easter Egg Page</title>
-
-  <!-- Google Font: Orbitron -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-
   <style>
     /* ===== CUSTOMIZATION SECTION ===== */
     :root {
       --bg-color: #fffae3;           
       --text-color: #333;            
-      --accent-color: #ff6f61;       
-      --font-family: 'Orbitron', sans-serif; 
+      --font-family: 'Arial', sans-serif; 
+      --font-style: italic;          
       --image-url: 'https://placekitten.com/400/300'; 
-      --sound-url: '';                
+      --music-url: '';               /* Add your mp3 URL here */
     }
 
     /* ===== PAGE STYLING ===== */
@@ -24,6 +20,7 @@
       margin: 0;
       padding: 0;
       font-family: var(--font-family);
+      font-style: var(--font-style);
       background-color: var(--bg-color);
       color: var(--text-color);
       display: flex;
@@ -45,22 +42,6 @@
       margin-bottom: 1em;
     }
 
-    button {
-      background-color: var(--accent-color);
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
-      font-size: 1em;
-      cursor: pointer;
-      border-radius: 10px;
-      transition: transform 0.2s, background-color 0.2s;
-    }
-
-    button:hover {
-      transform: scale(1.1);
-      background-color: #ff4a3a;
-    }
-
     img {
       max-width: 80%;
       border-radius: 20px;
@@ -79,29 +60,28 @@
   <p>Click the image to reveal a surprise.</p>
   
   <img src="https://placekitten.com/400/300" alt="Easter Egg Image" id="eggImage">
-  
-  <button id="customButton">Click Me!</button>
+
+  <!-- Background Music -->
+  <audio id="bgMusic" src="apps/music/music/songs/Blonde_KLICKAUD.mp3" autoplay loop></audio>
 
   <script>
     const img = document.getElementById('eggImage');
-    const button = document.getElementById('customButton');
+    const music = document.getElementById('bgMusic');
 
+    // Load music from CSS variable
+    const musicUrl = getComputedStyle(document.documentElement).getPropertyValue('--music-url').trim();
+    if(musicUrl){
+      music.src = musicUrl;
+      music.play().catch(() => {
+        console.log('Autoplay prevented by browser, click image to start music.');
+      });
+    }
+
+    // Image click action
     img.addEventListener('click', () => {
       alert('🎉 Surprise! You found the hidden message!');
-      const audioUrl = getComputedStyle(document.documentElement).getPropertyValue('--sound-url').trim();
-      if(audioUrl){
-        new Audio(audioUrl).play();
-      }
+      if(music.paused) music.play();
     });
-
-    button.addEventListener('click', () => {
-      document.body.style.backgroundColor = getRandomColor();
-      button.textContent = '🎊 Yay! 🎊';
-    });
-
-    function getRandomColor() {
-      return '#' + Math.floor(Math.random()*16777215).toString(16);
-    }
   </script>
 </body>
 </html>
