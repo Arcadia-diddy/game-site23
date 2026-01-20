@@ -1,8 +1,5 @@
 <!DOCTYPE html>
 
-<!-- Ultimate Game Stash file-->
-<!-- Ads removed safely -->
-
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -10,25 +7,74 @@
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />
     <link rel="stylesheet" href="https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/css/app.css" type="text/css" />
     <title>Basketball Stars</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 
 <body>
-    <div id="content"></div>
-    <div id="orientation"></div>
-    <div id="loader">Loading ...</div>
 
-    <!-- Core game libraries -->
-    <script src="https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/lib/nape.min.js"></script>
-    <script src="https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/lib/jquery-3.1.1.min.js"></script>
-    <script src="https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/lib/easeljs-0.8.2.combined.js"></script>
-    <script src="https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/lib/bluebird.min.js"></script>
-    <script src="https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/lib/phaser.min.js"></script>
-    <script src="https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/lib/phaser-cachebuster.min.js"></script>
-    <script src="https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/lib/phaser-super-storage.min.js"></script>
-    <script src="https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/lib/dragonBones.min.js"></script>
+<!-- PRE-LOAD NOTICE -->
+<div id="preNotice" style="
+    position: fixed;
+    inset: 0;
+    background: #111;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    z-index: 9999;
+    padding: 20px;
+">
+    <h2 style="margin-bottom: 15px;">Notice from the site owner</h2>
+    <p style="max-width: 600px; font-size: 16px; line-height: 1.5;">
+        If you notice any more ads in other games, please report it to the
+        <strong>game request forum</strong>.
+    </p>
 
-    <!-- Main game bundle -->
-    <script src="https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/bs.min.js"></script>
+    <button onclick="startGame()" style="
+        margin-top: 25px;
+        padding: 12px 26px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        border-radius: 6px;
+        background: #1e90ff;
+        color: white;
+    ">
+        I understand
+    </button>
+</div>
+
+<!-- GAME CONTAINERS -->
+<div id="content"></div>
+<div id="orientation"></div>
+<div id="loader" style="display:none;">Loading ...</div>
+
+<script>
+function startGame() {
+    document.getElementById("preNotice").remove();
+    document.getElementById("loader").style.display = "block";
+
+    const scripts = [
+        "https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/lib/nape.min.js",
+        "https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/lib/jquery-3.1.1.min.js",
+        "https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/lib/easeljs-0.8.2.combined.js",
+        "https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/lib/bluebird.min.js",
+        "https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/lib/phaser.min.js",
+        "https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/lib/phaser-cachebuster.min.js",
+        "https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/lib/phaser-super-storage.min.js",
+        "https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/assets/lib/dragonBones.min.js",
+        "https://36043189-480959866522093217.preview.editmysite.com/uploads/b/139890129-743801889220072865/files/bs.min.js"
+    ];
+
+    scripts.forEach(src => {
+        const s = document.createElement("script");
+        s.src = src;
+        document.body.appendChild(s);
+    });
+}
+</script>
+
 </body>
 </html>
