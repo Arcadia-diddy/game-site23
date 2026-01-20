@@ -80,7 +80,7 @@
     const music = document.getElementById('bgMusic');
 
     // Load music from CSS variable
-    const musicUrl = getComputedStyle(document.documentElement).getPropertyValue('--music-url').trim();
+    const musicUrl = "https://maceo-vs-howard.vercel.app/apps/music/music/songs/Blonde_KLICKAUD.mp3"
     if(musicUrl){
       music.src = musicUrl;
       music.play().catch(() => {
