@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <!-- Ultimate Game Stash file -->
-<!-- Ads & monetization fully removed -->
+<!-- Poki SDK kept, ads disabled -->
 
 <html lang="en">
 <head>
@@ -16,10 +16,15 @@
 
     <title>Bacon May Die by SnoutUp</title>
 
+    <!-- KEEP Poki SDK -->
+    <script src="poki-sdk.js"></script>
+
+    <!-- REMOVE prebid ads -->
+    <!-- <script src="html5game/prebid/ads.js"></script> -->
+
     <style>
         html, body {
             height: 100%;
-            width: 100%;
             margin: 0;
             overflow: hidden;
             background-color: #191923;
@@ -39,9 +44,9 @@
             position: fixed;
             height: 56%;
             width: 5px;
-            margin: 0 auto;
             left: 0;
             right: 0;
+            margin: 0 auto;
             background: rgba(25,25,35,0.5);
         }
 
@@ -88,42 +93,67 @@
 </div>
 
 <script>
-    var canvas = document.getElementById("canvas");
-    var bar = document.getElementById("bar");
-    var fill = document.getElementById("fill");
-    var decor = document.getElementById("decor");
+    /* --- Poki SDK SAFE MODE --- */
+    const sdk = PokiSDK;
+    const pokiDebug = false;
 
-    var progress = 0;
+    // hard-disable ads
+    sdk.commercialBreak = () => Promise.resolve();
+    sdk.rewardedBreak = () => Promise.resolve(false);
+
+    const canvas = document.getElementById("canvas");
+    const bar = document.getElementById("bar");
+    const fill = document.getElementById("fill");
+    const decor = document.getElementById("decor");
+
+    let fakePercent = 1;
+    let targetPercent = 75;
+
+    function poki_loading(progress) {
+        targetPercent = Math.max(targetPercent, progress * 100);
+        sdk.gameLoadingProgress({ percentageDone: progress });
+        if (progress === 1) {
+            setTimeout(() => {
+                bar.style.display = "none";
+                decor.style.display = "none";
+                canvas.style.display = "block";
+            }, 500);
+        }
+    }
+
+    function lerp(a, b, t) {
+        return (1 - t) * a + t * b;
+    }
+
+    const fakeLoader = setInterval(() => {
+        fakePercent = lerp(fakePercent, targetPercent, 0.05);
+        fill.style.height = fakePercent + "%";
+    }, 20);
 
     function startGame() {
         try {
             GameMaker_Init();
-            bar.style.display = "none";
-            decor.style.display = "none";
-            canvas.style.display = "block";
         } catch (e) {
             setTimeout(startGame, 1000);
         }
     }
 
-    var loadingInterval = setInterval(() => {
-        progress = Math.min(progress + 1, 100);
-        fill.style.height = progress + "%";
-        if (progress >= 100) {
-            clearInterval(loadingInterval);
-            setTimeout(startGame, 500);
-        }
-    }, 20);
-
     window.onload = () => {
+        sdk.init().then(() => {
+            sdk.setDebug(pokiDebug);
+            sdk.gameLoadingStart();
+            startGame();
+        }).catch(() => {
+            startGame();
+        });
+
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        window.focus();
     };
 
     window.addEventListener('wheel', e => e.preventDefault(), { passive: false });
     window.addEventListener('keydown', e => {
-        if (['ArrowDown','ArrowUp',' '].includes(e.key)) e.preventDefault();
+        if (['ArrowDown', 'ArrowUp', ' '].includes(e.key)) e.preventDefault();
     });
 </script>
 
