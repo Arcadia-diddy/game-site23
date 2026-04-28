@@ -22,14 +22,69 @@
     .card img{width:100%;height:120px;object-fit:cover;border-radius:8px;background:#333}
   </style>
 </head>
+
 <body>
+
+<!-- TERMS OVERLAY -->
+<div id="termsOverlay" style="
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.95);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+">
+  <div style="
+    background:var(--card);
+    padding:2rem;
+    border-radius:12px;
+    max-width:500px;
+    width:90%;
+    text-align:center;
+    box-shadow:0 0 25px rgba(0,255,136,0.3);
+  ">
+    <h2 style="margin-bottom:1rem;">Terms of Use</h2>
+    <p style="font-size:1rem; color:#aaa; margin-bottom:1.5rem;">
+      By checking the box, continuing, and using this site, you agree to these terms and conditions of use, and you agree that if misuse is present, you will be reported.
+      You shall not use the site to stream anything innapropriate. (innapropriate is not subjective, should be anything not advised for a middle schooler to see.)
+      You shall not use the site to partake in illegal activities or research said activities.
+      You shall not use the site to make threats or show bigotry or violence to a group or individual.
+      You shall not allow use of this site by your peers to violate any of these rules.
+      If any rule is violated, you agree to be reported for your actions.
+    </p>
+
+    <label style="font-size:0.95rem;">
+      <input type="checkbox" id="agreeBox">
+      I agree to the Terms
+    </label>
+    <br>
+
+    <button id="continueBtn" disabled style="
+      margin-top:1rem;
+      padding:10px 20px;
+      border:none;
+      border-radius:8px;
+      background:#333;
+      color:#aaa;
+      cursor:not-allowed;
+    ">
+      Continue
+    </button>
+  </div>
+</div>
+
+<!-- SITE CONTENT -->
+<div id="siteContent" style="display:none;">
+
   <nav style="text-align:center">
     <a href="index.html">Home</a>
     <a href="games.html">Games</a>
     <a href="apps.html">Apps</a>
     <a href="info.html">Info</a>
     <a href="settings.html">Settings</a>
-    <a href= "https://the-loader.vercel.app">Open in about:blank</a>
+    <a href="https://the-loader.vercel.app">Open in about:blank</a>
   </nav>
 
   <h1>milesshawts site</h1>
@@ -37,12 +92,10 @@
   <div style="text-align:center; margin:2rem 0; font-size:1.2rem;">
     <img src="assets/logo.png" alt="Logo" style="max-width:200px; width:100%; height:auto;">
     <div style="margin-top:0.5rem;">
-        <a href="apps/milesshawtplayer/yespapi.html" style="text-decoration:none; color:inherit; cursor:default;">welcome 2 my site</a>
+      <a href="apps/milesshawtplayer/yespapi.html" style="text-decoration:none; color:inherit; cursor:default;">welcome 2 my site</a>
     </div>
   </div>
 
-
-  <!-- RANDOM MOTTO HERE -->
   <p id="motto">Loading...</p>
 
   <div class="grid">
@@ -59,12 +112,12 @@
     <div class="card">
       <img src="apps/prx/image.png" alt="Apps">
       <div>Best Browser</div>
-      <a href="apps/ddg/index.html">Open</a>
+      <a href="placeholder 4 browsers.html">Open</a>
     </div>
     <div class="card">
       <img src="apps/prx/image.png" alt="Apps">
       <div>Browser</div>
-      <a href="apps/rammer/index.html">Open</a>
+      <a href="placeholder 4 browsers.html">Open</a>
     </div>
     <div class="card">
       <img src="apps/chat/image.png" alt="Apps">
@@ -86,62 +139,70 @@
       <div>My Socials</div>
       <a href="socials.html">Open</a>
     </div>
-    
   </div>
 
-  <script>
-    const mottos = [
-      "pop goes the weasel",
-      "Dude you know what’s crazy? Is that that low taper fade, like meme, dude it is still massive. Yeah. MASSIVE. I mean I’m seeing new ones that I’ve never seen before that have millions of likes and views, still, that are popping up all over the place.",
-      "hi jequan",
-      "i have fun making these little texts btw",
-      "watch poopmadness on utube",
-      "i bet you're using a chromebook on this darn site",
-      "hi",
-      "i said hi say it back",
-      "try the games",
-      "try the apps",
-      "yo keisha",
-      "hi malik",
-      "im lurking and im stalking when you least expect it",
-      "tylaw chasin harlem",
-      "hop on lunch table gng",
-      "boi got his wifi from walmart",
-      "are you a robot",
-      "just play the game bro why are you reading these",
-      "whats 9 plus 10",
-      "open the apps tab you won't",
-      "who unplugged my wifi god damnit",
-      "use the chat system in apps istg it actually works",
-      "tung tung tung",
-      "where u goin hemmy😂😂😂"
-    ];
+</div>
 
-    // === PICK RANDOM MOTTO ===
-    const randomMotto = mottos[Math.floor(Math.random() * mottos.length)];
-    document.getElementById('motto').innerHTML = randomMotto;
+<script>
+  // TERMS LOGIC (WITH REMEMBER)
+  const agreeBox = document.getElementById("agreeBox");
+  const continueBtn = document.getElementById("continueBtn");
+  const overlay = document.getElementById("termsOverlay");
+  const site = document.getElementById("siteContent");
 
-    // === THEME SYNC (CLEAN TITLE) ===
-    const themes = {
-      dark:     {bg:'#0d0d0d', card:'#1a1a1a', text:'#eee', glow:'#00ff88', accent:'#00bfff'},
-      fulldark: {bg:'#000000', card:'#111111', text:'#ffffff', glow:'#00ff88', accent:'#00bfff'},
-      light:    {bg:'#f5f5f5', card:'#ffffff', text:'#111', glow:'#00c853', accent:'#2962ff'},
-      sakura:   {bg:'#e8b8d0', card:'#d89cc1', text:'#a83b6e', glow:'#ff8ac1', accent:'#ff5aa5'},
-      ocean:    {bg:'#0a1a2f', card:'#0f2b4a', text:'#a0e7ff', glow:'#00d4ff', accent:'#0099cc'},
-      sunset:   {bg:'#ff6b35', card:'#ff8c42', text:'#fff', glow:'#ff4757', accent:'#ffa502'},
-      forest:   {bg:'#1a2e19', card:'#2d4a2b', text:'#b2f2bb', glow:'#51cf66', accent:'#37b24d'},
-      neon:     {bg:'#1a0033', card:'#2a004d', text:'#e0b3ff', glow:'#ff00ff', accent:'#9d00ff'},
-      retro:    {bg:'#0a0a0a', card:'#1a1a1a', text:'#0f0', glow:'#0f0', accent:'#ff0'}
-    };
+  // check if already accepted
+  if (localStorage.getItem("acceptedTerms") === "true") {
+    overlay.style.display = "none";
+    site.style.display = "block";
+  }
 
-    const saved = JSON.parse(localStorage.getItem('unblockedHubSettings') || '{}');
-    if (saved.name) document.title = saved.name;
-    if (saved.favicon) document.getElementById('favicon').href = saved.favicon;
-    if (saved.theme && themes[saved.theme]) {
-      const t = themes[saved.theme];
-      Object.keys(t).forEach(k => document.documentElement.style.setProperty('--'+k, t[k]));
-      document.body.style.background = t.bg;
+  agreeBox.addEventListener("change", () => {
+    if (agreeBox.checked) {
+      continueBtn.disabled = false;
+      continueBtn.style.cursor = "pointer";
+      continueBtn.style.background = "var(--glow)";
+      continueBtn.style.color = "#000";
+    } else {
+      continueBtn.disabled = true;
+      continueBtn.style.cursor = "not-allowed";
+      continueBtn.style.background = "#333";
+      continueBtn.style.color = "#aaa";
     }
-  </script>
+  });
+
+  continueBtn.addEventListener("click", () => {
+    if (!continueBtn.disabled) {
+      localStorage.setItem("acceptedTerms", "true");
+      overlay.style.display = "none";
+      site.style.display = "block";
+    }
+  });
+
+  // === MOTTO ===
+  const mottos = [
+    "pop goes the weasel",
+    "hi",
+    "try the games",
+    "try the apps",
+    "yo keisha",
+    "whats 9 plus 10"
+  ];
+  document.getElementById('motto').innerHTML = mottos[Math.floor(Math.random() * mottos.length)];
+
+  // === THEME SYNC ===
+  const themes = {
+    dark:{bg:'#0d0d0d',card:'#1a1a1a',text:'#eee',glow:'#00ff88',accent:'#00bfff'}
+  };
+
+  const saved = JSON.parse(localStorage.getItem('unblockedHubSettings') || '{}');
+  if (saved.name) document.title = saved.name;
+  if (saved.favicon) document.getElementById('favicon').href = saved.favicon;
+  if (saved.theme && themes[saved.theme]) {
+    const t = themes[saved.theme];
+    Object.keys(t).forEach(k => document.documentElement.style.setProperty('--'+k, t[k]));
+    document.body.style.background = t.bg;
+  }
+</script>
+
 </body>
 </html>
